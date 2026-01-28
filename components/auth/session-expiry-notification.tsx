@@ -51,7 +51,11 @@ export function SessionExpiryNotification() {
                 <div className="flex items-center justify-between bg-amber-50 px-3 py-2 rounded-md">
                     <div className="flex items-center gap-2 text-amber-700 text-sm font-medium">
                         <Clock size={16} />
-                        <span>{Math.floor(timeLeft! / 60)}:{(timeLeft! % 60).toString().padStart(2, '0')}</span>
+                        <span>
+                            {timeLeft! >= 3600 ? `${Math.floor(timeLeft! / 3600)}:` : ''}
+                            {Math.floor((timeLeft! % 3600) / 60).toString().padStart(timeLeft! >= 3600 ? 2 : 1, '0')}:
+                            {(timeLeft! % 60).toString().padStart(2, '0')}
+                        </span>
                     </div>
                 </div>
 
