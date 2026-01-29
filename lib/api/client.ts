@@ -42,7 +42,13 @@ apiClient.interceptors.request.use(
 
 // Response interceptor - Enhanced error handling
 apiClient.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        // Automatically update token if provided in response (e.g. after user/role updates)
+        if (response.data && response.data.accessToken) {
+            setStoredAccessToken(response.data.accessToken)
+        }
+        return response
+    },
     async (error) => {
         const originalRequest = error.config
 

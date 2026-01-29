@@ -1,14 +1,14 @@
 'use client'
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { fetchAnalisisIAActual, fetchHistorialAnalisisIA, generarAnalisisManual } from '@/lib/api/ia-service'
+import { fetchAnalisisIAActual, fetchHistorialAnalisisIA, generarAnalisisManual, checkAIStatus } from '@/lib/api/ia-service'
 import { LoadingSpinner } from '@/components/ui'
 import { Brain, Sparkles, TrendingUp, Droplets, FlaskConical, AlertTriangle, Info, Clock, Calendar, Zap, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
 import { useAuth } from '@/hooks/use-auth'
 import { ManualAnalysisForm } from './manual-analysis-form'
-import { ManualAIAnalysisDto } from '@/lib/types/api'
+import type { AnalisisIAActual, AnalisisIA, ManualAIAnalysisDto, CheckAIStatusResponse } from '@/lib/types/api'
 import { useToast } from '@/providers/toast-provider'
 
 interface AIAnalysisViewProps {
@@ -95,12 +95,22 @@ export function AIAnalysisView({ cultivoId }: AIAnalysisViewProps) {
     const [viewMode, setViewMode] = useState<'current' | 'history'>('current')
     const [selectedHistoryIndex, setSelectedHistoryIndex] = useState(0)
 
-    const { data: analisisActual, isLoading: loadingActual, isError: errorActual, refetch: refetchActual } = useQuery({
-        queryKey: ['ia-analisis-actual', cultivoId],
+    const hasDevices = !!user?.modulos?.some(m => m.slug === 'dispositivos')
+
+    const { data: aiStatus, isLoading: loadingStatus, refetch: refetchStatus } = useQuery({
+        queryKey: ['ia-status', cultivoId],
+        queryFn: () => checkAIStatus(cultivoId),
+        refetchOnWindowFocus: false,
+        staleTime: 1000 * 60 * 5,
+        enabled: viewMode === 'current'
+    })
+
+    const { data: analisisAutomatico, isLoading: loadingAutomatico, isError: errorAutomatico, refetch: refetchAutomatico } = useQuery({
+        queryKey: ['ia-analisis-automatico', cultivoId],
         queryFn: () => fetchAnalisisIAActual(cultivoId),
         refetchOnWindowFocus: false,
         staleTime: 1000 * 60 * 5,
-        enabled: viewMode === 'current' && !!user?.modulos?.some(m => m.slug === 'dispositivos')
+        enabled: viewMode === 'current' && !aiStatus?.analisisId && hasDevices
     })
 
     const { data: historial = [], isLoading: loadingHistorial, isError: errorHistorial, refetch: refetchHistorial } = useQuery({
@@ -113,11 +123,20 @@ export function AIAnalysisView({ cultivoId }: AIAnalysisViewProps) {
 
     const manualAnalysisMutation = useMutation({
         mutationFn: (data: ManualAIAnalysisDto) => generarAnalisisManual(cultivoId, data),
-        onSuccess: () => {
-            // Once stored, proceed to call the prediction endpoint (GET /ia/analisis/:cultivoId)
-            refetchActual()
+        onSuccess: (data) => {
+            // Manually update the query cache with the returned data
+            queryClient.setQueryData<CheckAIStatusResponse>(['ia-status', cultivoId], {
+                es_cache: false,
+                origen: 'manual',
+                fecha: data.fecha,
+                analisisId: data.id,
+                analisis_prediccion: data.analisis_prediccion,
+                snapshot: data.snapshot,
+                existe: true
+            })
+
             queryClient.invalidateQueries({ queryKey: ['ia-analisis-historial', cultivoId] })
-            showToast('Datos almacenados. Generando análisis...', 'success')
+            showToast('Análisis generado con éxito', 'success')
         },
         onError: (err) => {
             const msg = err instanceof Error ? err.message : 'Error al generar análisis'
@@ -129,8 +148,10 @@ export function AIAnalysisView({ cultivoId }: AIAnalysisViewProps) {
         manualAnalysisMutation.mutate(data)
     }
 
-    const isLoading = viewMode === 'current' ? (loadingActual || manualAnalysisMutation.isPending) : loadingHistorial
-    const isError = viewMode === 'current' ? errorActual : errorHistorial
+    const isLoading = viewMode === 'current'
+        ? (loadingStatus || manualAnalysisMutation.isPending || (hasDevices && !aiStatus?.analisisId && loadingAutomatico))
+        : loadingHistorial
+    const isError = viewMode === 'history' ? errorHistorial : (viewMode === 'current' && hasDevices && errorAutomatico)
 
     if (isLoading) {
         return (
@@ -153,10 +174,16 @@ export function AIAnalysisView({ cultivoId }: AIAnalysisViewProps) {
                 <AlertTriangle className="w-16 h-16 text-slate-200 mb-4" />
                 <h3 className="text-xl font-black text-slate-800 mb-2">Error en el análisis</h3>
                 <p className="text-slate-500 max-w-sm text-center mb-8">
-                    No pudimos conectar con el motor de IA. Por favor, verifica tu conexión o intenta más tarde.
+                    {hasDevices && viewMode === 'current' && errorAutomatico
+                        ? 'No pudimos obtener datos de tus dispositivos para generar el análisis automático.'
+                        : 'No pudimos conectar con el motor de IA. Por favor, verifica tu conexión o intenta más tarde.'}
                 </p>
                 <button
-                    onClick={() => viewMode === 'current' ? refetchActual() : refetchHistorial()}
+                    onClick={() => {
+                        if (viewMode === 'history') refetchHistorial()
+                        else if (hasDevices && !aiStatus?.analisisId) refetchAutomatico()
+                        else refetchStatus()
+                    }}
                     className="px-6 py-3 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition-all active:scale-95"
                 >
                     Reintentar Análisis
@@ -165,12 +192,21 @@ export function AIAnalysisView({ cultivoId }: AIAnalysisViewProps) {
         )
     }
 
-    const displayData = viewMode === 'current' && analisisActual
+    const currentAnalysisData = aiStatus?.analisisId
         ? {
-            snapshot: analisisActual.snapshot,
-            analisis: analisisActual.analisis_prediccion,
-            fecha: analisisActual.fecha,
-            es_cache: analisisActual.es_cache
+            snapshot: aiStatus.snapshot,
+            analisis: aiStatus.analisis_prediccion,
+            fecha: aiStatus.fecha,
+            es_cache: aiStatus.es_cache
+        }
+        : analisisAutomatico
+
+    const displayData = viewMode === 'current' && currentAnalysisData
+        ? {
+            snapshot: currentAnalysisData.snapshot,
+            analisis: (currentAnalysisData as any).analisis_prediccion || (currentAnalysisData as any).analisis,
+            fecha: currentAnalysisData.fecha,
+            es_cache: (currentAnalysisData as any).es_cache || false
         }
         : viewMode === 'history' && historial[selectedHistoryIndex]
             ? {
@@ -180,6 +216,17 @@ export function AIAnalysisView({ cultivoId }: AIAnalysisViewProps) {
                 es_cache: false
             }
             : null
+
+    const isToday = (dateString: string) => {
+        if (!dateString) return false
+        const date = new Date(dateString)
+        const today = new Date()
+        return date.getDate() === today.getDate() &&
+            date.getMonth() === today.getMonth() &&
+            date.getFullYear() === today.getFullYear()
+    }
+
+    const hasAnalysisToday = currentAnalysisData && isToday(currentAnalysisData.fecha || '')
 
     return (
         <div className="space-y-8">
@@ -212,7 +259,7 @@ export function AIAnalysisView({ cultivoId }: AIAnalysisViewProps) {
             </div>
 
             {
-                viewMode === 'current' && !user?.modulos?.some(m => m.slug === 'dispositivos') && !displayData && (
+                viewMode === 'current' && !aiStatus?.analisisId && !hasDevices && (
                     <div className="animate-in fade-in slide-in-from-top-4 duration-300">
                         <ManualAnalysisForm
                             onSubmit={handleManualSubmit}
@@ -263,13 +310,13 @@ export function AIAnalysisView({ cultivoId }: AIAnalysisViewProps) {
             }
 
             {
-                viewMode === 'current' && displayData?.es_cache && (
+                viewMode === 'current' && hasAnalysisToday && (
                     <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
                         <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                         <div>
-                            <p className="text-sm font-bold text-amber-900">Análisis en Caché</p>
+                            <p className="text-sm font-bold text-amber-900">Análisis del Día</p>
                             <p className="text-xs text-amber-700 mt-1">
-                                Este análisis fue generado hoy. Solo se genera un nuevo análisis por día.
+                                Ya se ha generado un análisis para hoy. El sistema permite un análisis por jornada para asegurar el seguimiento adecuado del ciclo de cultivo.
                             </p>
                         </div>
                     </div>
@@ -363,7 +410,7 @@ export function AIAnalysisView({ cultivoId }: AIAnalysisViewProps) {
                                 </h3>
 
                                 <div className="grid grid-cols-1 gap-4">
-                                    {displayData.snapshot.nutricion.slice(0, 1).map((riego, idx) => (
+                                    {displayData.snapshot.nutricion.slice(0, 1).map((riego: any, idx: number) => (
                                         <div key={idx} className="space-y-4">
                                             <div className="p-4 bg-white rounded-2xl border border-slate-100 flex items-center justify-between shadow-sm">
                                                 <div className="flex items-center gap-3">

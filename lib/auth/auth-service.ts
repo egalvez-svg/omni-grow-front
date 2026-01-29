@@ -48,24 +48,28 @@ export async function loginUser(credentials: LoginCredentials): Promise<User> {
 }
 
 export async function logoutUser(): Promise<void> {
+    // Clear local state immediately to avoid race conditions with redirects
+    if (typeof window !== 'undefined') {
+        localStorage.removeItem(ACCESS_TOKEN_KEY)
+        localStorage.removeItem(REFRESH_TOKEN_KEY)
+        localStorage.removeItem(USER_KEY)
+
+        Cookies.remove(ACCESS_TOKEN_KEY)
+        Cookies.remove(REFRESH_TOKEN_KEY)
+        Cookies.remove(ROLES_KEY)
+        Cookies.remove(MODULES_KEY)
+
+        // Dispatch event for reactive updates in React context
+        // This is still useful if the logout is called from outside the AuthContext
+        window.dispatchEvent(new CustomEvent('auth-logout'))
+    }
+
     try {
+        // Fire and forget, or wait if caller awaits. 
+        // We don't want to block the UI clearing on network latency.
         await apiClient.post('/auth/logout')
     } catch (error) {
         console.error('Error during backend logout:', error)
-    } finally {
-        if (typeof window !== 'undefined') {
-            localStorage.removeItem(ACCESS_TOKEN_KEY)
-            localStorage.removeItem(REFRESH_TOKEN_KEY)
-            localStorage.removeItem(USER_KEY)
-
-            Cookies.remove(ACCESS_TOKEN_KEY)
-            Cookies.remove(REFRESH_TOKEN_KEY)
-            Cookies.remove(ROLES_KEY)
-            Cookies.remove(MODULES_KEY)
-
-            // Dispatch event for reactive updates in React context
-            window.dispatchEvent(new CustomEvent('auth-logout'))
-        }
     }
 }
 

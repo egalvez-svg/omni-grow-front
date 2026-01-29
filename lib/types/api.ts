@@ -507,3 +507,14 @@ export interface ManualAIAnalysisDto {
     notas_usuario?: string
 }
 
+
+export interface CheckAIStatusResponse {
+    es_cache?: boolean
+    origen?: 'sensor' | 'manual'
+    fecha?: string
+    analisisId?: number
+    analisis_prediccion?: string
+    snapshot?: any
+    // For compatibility if backend keeps sending or we need to derive it
+    existe?: boolean
+}
