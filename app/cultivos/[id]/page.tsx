@@ -45,18 +45,25 @@ import { Modal } from '@/components/ui/modal'
 import { CreatePlantaForm } from '@/components/forms/create-planta-form'
 import { CreateNutricionForm } from '@/components/forms/create-nutricion-form'
 import { CreateCultivoForm } from '@/components/forms/create-cultivo-form'
+import { ChangePhaseForm } from '@/components/forms/change-phase-form'
 import { AIAnalysisView } from '@/components/cultivos/ai-analysis-view'
 import { Planta, NutricionSemanal } from '@/lib/types/api'
 import type { TimeRange } from '@/lib/utils/mock-sensor-data'
 
-const statusConfig: Record<string, { color: string, bg: string, label: string }> = {
-    'activo': { color: 'text-emerald-700', bg: 'bg-emerald-100', label: 'Activo' },
-    'esqueje': { color: 'text-teal-700', bg: 'bg-teal-100', label: 'Esqueje' },
-    'vegetativo': { color: 'text-blue-700', bg: 'bg-blue-100', label: 'Vegetativo' },
-    'floracion': { color: 'text-purple-700', bg: 'bg-purple-100', label: 'Floración' },
-    'cosecha': { color: 'text-orange-700', bg: 'bg-orange-100', label: 'Cosecha' },
-    'finalizado': { color: 'text-slate-700', bg: 'bg-slate-100', label: 'Finalizado' },
-    'cancelado': { color: 'text-red-700', bg: 'bg-red-100', label: 'Cancelado' },
+import { PhaseTimeline } from '@/components/cultivos/phase-timeline'
+
+const phaseStyles: Record<string, { color: string, bg: string }> = {
+    'semilla': { color: 'text-amber-700', bg: 'bg-amber-100' },
+    'esqueje': { color: 'text-teal-700', bg: 'bg-teal-100' },
+    'vegetativo': { color: 'text-blue-700', bg: 'bg-blue-100' },
+    'floracion': { color: 'text-purple-700', bg: 'bg-purple-100' },
+    'cosecha': { color: 'text-orange-700', bg: 'bg-orange-100' },
+    'secado': { color: 'text-slate-700', bg: 'bg-slate-100' },
+    'curado': { color: 'text-emerald-700', bg: 'bg-emerald-100' },
+}
+
+const getPhaseStyle = (slug: string) => {
+    return phaseStyles[slug] || { color: 'text-sky-700', bg: 'bg-sky-100' }
 }
 
 export default function CultivoDetailPage() {
@@ -73,6 +80,7 @@ export default function CultivoDetailPage() {
     const [isAddNutricionModalOpen, setIsAddNutricionModalOpen] = useState(false)
     const [isEditNutricionModalOpen, setIsEditNutricionModalOpen] = useState(false)
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+    const [isChangePhaseModalOpen, setIsChangePhaseModalOpen] = useState(false)
 
     const [selectedFila, setSelectedFila] = useState<number | undefined>(undefined)
     const [selectedColumna, setSelectedColumna] = useState<number | undefined>(undefined)
@@ -250,18 +258,24 @@ export default function CultivoDetailPage() {
                         </button>
                         <div>
                             <div className="flex items-center gap-3 mb-2">
-                                {(() => {
-                                    const status = statusConfig[cultivo.estado.toLowerCase()] || { color: 'text-sky-700', bg: 'bg-sky-100', label: cultivo.estado };
-                                    return (
-                                        <span className={cn(
-                                            "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider",
-                                            status.bg,
-                                            status.color
-                                        )}>
-                                            {status.label}
-                                        </span>
-                                    );
-                                })()}
+                                {cultivo.faseActual ? (
+                                    (() => {
+                                        const style = getPhaseStyle(cultivo.faseActual.slug);
+                                        return (
+                                            <span className={cn(
+                                                "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider",
+                                                style.bg,
+                                                style.color
+                                            )}>
+                                                {cultivo.faseActual.nombre}
+                                            </span>
+                                        );
+                                    })()
+                                ) : (
+                                    <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-100 text-slate-500">
+                                        Sin Fase
+                                    </span>
+                                )}
                                 <span className="text-slate-400 text-sm flex items-center gap-1.5 font-medium">
                                     <Calendar className="w-4 h-4" />
                                     Iniciado: {formatLocalDate(cultivo.fecha_inicio)}
@@ -297,6 +311,13 @@ export default function CultivoDetailPage() {
 
                     <div className="flex items-center gap-3">
                         <button
+                            onClick={() => setIsChangePhaseModalOpen(true)}
+                            className="px-6 py-3 bg-white border border-slate-200 text-emerald-600 font-bold rounded-2xl hover:bg-emerald-50 transition-all shadow-sm flex items-center gap-2"
+                        >
+                            <Activity className="w-4 h-4" />
+                            Cambiar Etapa
+                        </button>
+                        <button
                             onClick={() => setIsEditModalOpen(true)}
                             className="px-6 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-2xl hover:bg-slate-50 transition-all shadow-sm flex items-center gap-2"
                         >
@@ -310,9 +331,6 @@ export default function CultivoDetailPage() {
                         >
                             <Trash2 className="w-4 h-4" />
                             Eliminar Ciclo
-                        </button>
-                        <button className="px-6 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-2xl hover:bg-slate-50 transition-all shadow-sm">
-                            Finalizar Ciclo
                         </button>
                     </div>
                 </div>
@@ -386,20 +404,13 @@ export default function CultivoDetailPage() {
                                 </div>
                             </div>
 
-                            {/* Activities or Notes */}
+                            {/* Historial de Fases (Timeline) */}
                             <section className="bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-sm">
                                 <div className="p-8 border-b border-slate-100 flex items-center justify-between">
-                                    <h2 className="text-2xl font-bold text-slate-800">Notas de Cultivo</h2>
-                                    <button className="text-sky-600 font-bold flex items-center gap-1 hover:underline">
-                                        Añadir nota
-                                        <ChevronRight className="w-4 h-4" />
-                                    </button>
+                                    <h2 className="text-2xl font-bold text-slate-800">Línea de Tiempo del Ciclo</h2>
                                 </div>
                                 <div className="p-8">
-                                    <div className="flex flex-col items-center justify-center py-10 opacity-40">
-                                        <ClipboardList className="w-16 h-16 text-slate-300 mb-4" />
-                                        <p className="font-medium text-slate-400">No hay observaciones registradas aún.</p>
-                                    </div>
+                                    <PhaseTimeline historial={cultivo.historialFases || []} />
                                 </div>
                             </section>
                         </div>
@@ -943,6 +954,19 @@ export default function CultivoDetailPage() {
                         queryClient.invalidateQueries({ queryKey: ['cultivo', id] })
                     }}
                     onCancel={() => setIsEditModalOpen(false)}
+                />
+            </Modal>
+
+            <Modal
+                isOpen={isChangePhaseModalOpen}
+                onClose={() => setIsChangePhaseModalOpen(false)}
+                title="Actualizar Fase del Cultivo"
+            >
+                <ChangePhaseForm
+                    cultivoId={id}
+                    currentPhaseId={cultivo.faseActual?.id}
+                    onSuccess={() => setIsChangePhaseModalOpen(false)}
+                    onCancel={() => setIsChangePhaseModalOpen(false)}
                 />
             </Modal>
         </div>

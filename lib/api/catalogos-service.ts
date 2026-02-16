@@ -1,5 +1,11 @@
 import apiClient from '@/lib/api/client'
-import type { Variedad, CreateVariedadDto, Producto, CreateProductoDto } from '@/lib/types/api'
+import type { Variedad, CreateVariedadDto, Producto, CreateProductoDto, Fase } from '@/lib/types/api'
+
+// Fases
+export async function fetchFases(): Promise<Fase[]> {
+    const response = await apiClient.get<Fase[]>('/fases')
+    return response.data
+}
 
 // Variedades
 export async function fetchVariedades(): Promise<Variedad[]> {

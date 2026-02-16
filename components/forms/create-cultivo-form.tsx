@@ -3,11 +3,11 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createCultivo, updateCultivo } from '@/lib/api/cultivos-service'
-import { fetchVariedades } from '@/lib/api/catalogos-service'
+import { fetchVariedades, fetchFases } from '@/lib/api/catalogos-service'
 import { fetchMediosCultivo } from '@/lib/api/medio-cultivo-service'
 import { fetchUserSalas } from '@/lib/api/salas-service'
 import { fetchCamasBySala } from '@/lib/api/camas-service'
-import { CreateCultivoDto, CropStatus, Cultivo } from '@/lib/types/api'
+import { CreateCultivoDto, CropStatus, Cultivo, Fase } from '@/lib/types/api'
 import { Plus, Sprout, Home, Layers, Dna, Calendar, Activity, Hash, AlertCircle, Save, Droplets } from 'lucide-react'
 import { ErrorMessage } from '@/components/ui/error-message'
 import { useToast } from '@/providers/toast-provider'
@@ -40,6 +40,7 @@ export function CreateCultivoForm({ initialData, onSuccess, onCancel }: CreateCu
             nombre: initialData?.nombre || '',
             fecha_inicio: initialData?.fecha_inicio ? initialData.fecha_inicio.split('T')[0] : new Date().toISOString().split('T')[0],
             estado: (initialData?.estado?.toLowerCase() as CropStatus) || 'vegetativo',
+            faseId: initialData?.faseActual?.id || 0,
             variedadIds,
             salaId: initialData?.salaId || initialData?.sala?.id || 0,
             camaId: initialData?.camaId || initialData?.cama?.id || 0,
@@ -56,6 +57,11 @@ export function CreateCultivoForm({ initialData, onSuccess, onCancel }: CreateCu
     const { data: variedades } = useQuery({
         queryKey: ['variedades'],
         queryFn: fetchVariedades
+    })
+
+    const { data: fases } = useQuery({
+        queryKey: ['fases'],
+        queryFn: fetchFases
     })
 
     const { data: salas } = useQuery({
@@ -291,22 +297,22 @@ export function CreateCultivoForm({ initialData, onSuccess, onCancel }: CreateCu
                     </div>
                 </div>
 
-                {/* Estado Inicial */}
+                {/* Fase Inicial */}
                 <div className="space-y-2">
                     <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
                         <Activity className="w-4 h-4 text-sky-500" />
-                        Estado Inicial
+                        Etapa Inicial
                     </label>
                     <select
                         required
-                        value={formData.estado}
-                        onChange={(e) => setFormData({ ...formData, estado: e.target.value as CropStatus })}
+                        value={formData.faseId}
+                        onChange={(e) => setFormData({ ...formData, faseId: parseInt(e.target.value) })}
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium text-slate-900"
                     >
-                        <option value="vegetativo">Vegetativo</option>
-                        <option value="esqueje">Esqueje</option>
-                        <option value="floracion">Floración</option>
-                        <option value="cosecha">Cosecha</option>
+                        <option value="">Seleccionar etapa inicial</option>
+                        {fases?.map(f => (
+                            <option key={f.id} value={f.id}>{f.nombre}</option>
+                        ))}
                     </select>
                 </div>
             </div>

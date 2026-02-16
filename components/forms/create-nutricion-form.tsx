@@ -131,6 +131,7 @@ export function CreateNutricionForm({ cultivoId, onSuccess, onCancel, initialDat
 
         const payload: CreateNutricionDto = {
             semana: semana ? parseInt(semana) : undefined,
+            faseHistorialId: initialData?.faseHistorialId,
             tipo_riego: tipoRiego,
             fecha_aplicacion: fechaAplicacion,
             litros_agua: parseFloat(litrosAgua) || 0,

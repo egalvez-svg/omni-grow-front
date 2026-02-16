@@ -1,5 +1,5 @@
 import apiClient from '@/lib/api/client'
-import type { Cultivo, CreateCultivoDto, Planta, CreatePlantaDto, NutricionSemanal, CreateNutricionDto } from '@/lib/types/api'
+import type { Cultivo, CreateCultivoDto, Planta, CreatePlantaDto, NutricionSemanal, CreateNutricionDto, CreateTransicionFaseDto, HistorialFase } from '@/lib/types/api'
 
 export async function fetchAllCultivos(): Promise<Cultivo[]> {
     const response = await apiClient.get<Cultivo[]>('/cultivos')
@@ -28,6 +28,11 @@ export async function createCultivo(data: CreateCultivoDto): Promise<Cultivo> {
 
 export async function updateCultivo(id: number, data: Partial<CreateCultivoDto>): Promise<Cultivo> {
     const response = await apiClient.patch<Cultivo>(`/cultivos/${id}`, data)
+    return response.data
+}
+
+export async function cambiarFase(id: number, data: CreateTransicionFaseDto): Promise<HistorialFase> {
+    const response = await apiClient.post<HistorialFase>(`/cultivos/${id}/transicion`, data)
     return response.data
 }
 

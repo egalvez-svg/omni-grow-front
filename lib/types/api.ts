@@ -276,12 +276,32 @@ export interface Cama {
 
 export type CropStatus = 'activo' | 'esqueje' | 'vegetativo' | 'floracion' | 'cosecha' | 'finalizado' | 'cancelado'
 
+export interface Fase {
+    id: number
+    nombre: string
+    slug: string // semila, vegetativo, floracion, etc.
+}
+
+export interface HistorialFase {
+    id: number
+    fase: {
+        id: number
+        nombre: string
+        slug: string
+    }
+    fecha_inicio: string
+    fecha_fin: string | null
+    notas: string | null
+}
+
 export interface Cultivo {
     id: number
     nombre: string
     fecha_inicio: string
     fecha_fin?: string
-    estado: CropStatus
+    estado: CropStatus // Mantenido por compatibilidad
+    faseActual?: Fase
+    historialFases?: HistorialFase[]
     variedadId?: number // Deprecated, kept for backward compatibility
     variedadIds?: number[]
     salaId: number
@@ -343,6 +363,7 @@ export interface Producto {
 export interface NutricionSemanal {
     id: number
     cultivoId: number
+    faseHistorialId?: number
     semana?: number
     tipo_riego?: 'nutricion' | 'solo_agua' | 'lavado_raices' | 'agua_esquejes'
     fecha_aplicacion: string
@@ -391,7 +412,13 @@ export interface CreateCultivoDto {
     camaId?: number
     cantidad_plantas: number
     estado?: CropStatus
+    faseId?: number
     medioCultivoId?: number
+}
+
+export interface CreateTransicionFaseDto {
+    nuevaFaseId: number
+    notas?: string
 }
 
 export interface CreateMedioCultivoDto {
@@ -438,6 +465,7 @@ export interface ProductoRiegoDto {
 
 export interface CreateNutricionDto {
     semana?: number
+    faseHistorialId?: number
     tipo_riego?: 'nutricion' | 'solo_agua' | 'lavado_raices' | 'agua_esquejes'
     fecha_aplicacion: string
     litros_agua: number
