@@ -1,29 +1,33 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { cambiarFase } from '@/lib/api/cultivos-service'
 import { fetchFases } from '@/lib/api/catalogos-service'
-import { CreateTransicionFaseDto, Fase } from '@/lib/types/api'
-import { Activity, Save, AlertCircle, FileText } from 'lucide-react'
+import { fetchUserSalas } from '@/lib/api/salas-service'
+import { fetchCamasBySala } from '@/lib/api/camas-service'
+import { fetchMediosCultivo } from '@/lib/api/medio-cultivo-service'
+import { CreateTransicionFaseDto, Fase, Cultivo } from '@/lib/types/api'
+import { Activity, Save, AlertCircle, FileText, MapPin, Layers, Droplets } from 'lucide-react'
 import { ErrorMessage } from '@/components/ui/error-message'
 import { useToast } from '@/providers/toast-provider'
-import { cn } from '@/lib/utils'
 
 interface ChangePhaseFormProps {
-    cultivoId: number
-    currentPhaseId?: number
+    cultivo: Cultivo
     onSuccess: () => void
     onCancel: () => void
 }
 
-export function ChangePhaseForm({ cultivoId, currentPhaseId, onSuccess, onCancel }: ChangePhaseFormProps) {
+export function ChangePhaseForm({ cultivo, onSuccess, onCancel }: ChangePhaseFormProps) {
     const queryClient = useQueryClient()
     const { showToast } = useToast()
 
     const [formData, setFormData] = useState<CreateTransicionFaseDto>({
         nuevaFaseId: 0,
-        notas: ''
+        notas: '',
+        salaId: cultivo.salaId,
+        camaId: cultivo.camaId,
+        medioCultivoId: cultivo.medioCultivoId
     })
 
     const { data: fases } = useQuery({
@@ -31,10 +35,35 @@ export function ChangePhaseForm({ cultivoId, currentPhaseId, onSuccess, onCancel
         queryFn: fetchFases
     })
 
+    const { data: salas } = useQuery({
+        queryKey: ['salas'],
+        queryFn: fetchUserSalas
+    })
+
+    const { data: medios } = useQuery({
+        queryKey: ['medios-cultivo'],
+        queryFn: fetchMediosCultivo
+    })
+
+    const { data: camas, isLoading: loadingCamas } = useQuery({
+        queryKey: ['camas', formData.salaId],
+        queryFn: () => formData.salaId ? fetchCamasBySala(formData.salaId) : Promise.resolve([]),
+        enabled: !!formData.salaId
+    })
+
+    useEffect(() => {
+        if (camas && formData.camaId) {
+            const currentCamaExists = camas.some(c => c.id === formData.camaId)
+            if (!currentCamaExists) {
+                setFormData(prev => ({ ...prev, camaId: undefined }))
+            }
+        }
+    }, [camas, formData.salaId, formData.camaId])
+
     const mutation = useMutation({
-        mutationFn: (data: CreateTransicionFaseDto) => cambiarFase(cultivoId, data),
+        mutationFn: (data: CreateTransicionFaseDto) => cambiarFase(cultivo.id, data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['cultivo', cultivoId] })
+            queryClient.invalidateQueries({ queryKey: ['cultivo', cultivo.id] })
             showToast('Etapa actualizada correctamente', 'success')
             onSuccess()
         },
@@ -49,7 +78,7 @@ export function ChangePhaseForm({ cultivoId, currentPhaseId, onSuccess, onCancel
             showToast('Seleccionar nueva etapa', 'error')
             return
         }
-        if (formData.nuevaFaseId === currentPhaseId) {
+        if (formData.nuevaFaseId === cultivo.faseActual?.id) {
             showToast('La nueva etapa debe ser diferente a la actual', 'error')
             return
         }
@@ -68,11 +97,12 @@ export function ChangePhaseForm({ cultivoId, currentPhaseId, onSuccess, onCancel
                 </div>
             </div>
 
-            <div className="space-y-4">
-                <div className="space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Nueva Etapa */}
+                <div className="space-y-2 md:col-span-2">
                     <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
                         <Activity className="w-4 h-4 text-emerald-500" />
-                        Nueva Etapa
+                        Nueva Etapa <span className="text-rose-500">*</span>
                     </label>
                     <select
                         required
@@ -85,15 +115,71 @@ export function ChangePhaseForm({ cultivoId, currentPhaseId, onSuccess, onCancel
                             <option
                                 key={f.id}
                                 value={f.id}
-                                disabled={f.id === currentPhaseId}
+                                disabled={f.id === cultivo.faseActual?.id}
                             >
-                                {f.nombre} {f.id === currentPhaseId ? '(Actual)' : ''}
+                                {f.nombre} {f.id === cultivo.faseActual?.id ? '(Actual)' : ''}
                             </option>
                         ))}
                     </select>
                 </div>
 
+                {/* Sala */}
                 <div className="space-y-2">
+                    <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-sky-500" />
+                        Sala (Opcional)
+                    </label>
+                    <select
+                        value={formData.salaId || ''}
+                        onChange={(e) => setFormData({ ...formData, salaId: e.target.value ? parseInt(e.target.value) : undefined })}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium text-slate-900"
+                    >
+                        <option value="">Seleccionar sala...</option>
+                        {salas?.map(s => (
+                            <option key={s.id} value={s.id}>{s.nombre}</option>
+                        ))}
+                    </select>
+                </div>
+
+                {/* Cama */}
+                <div className="space-y-2">
+                    <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                        <Layers className="w-4 h-4 text-sky-500" />
+                        Cama (Opcional)
+                    </label>
+                    <select
+                        value={formData.camaId || ''}
+                        disabled={!formData.salaId || loadingCamas}
+                        onChange={(e) => setFormData({ ...formData, camaId: e.target.value ? parseInt(e.target.value) : undefined })}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium text-slate-900 disabled:opacity-50"
+                    >
+                        <option value="">{loadingCamas ? 'Cargando camas...' : 'Seleccionar cama...'}</option>
+                        {camas?.map(c => (
+                            <option key={c.id} value={c.id}>{c.nombre} (Cap: {c.capacidad_plantas})</option>
+                        ))}
+                    </select>
+                </div>
+
+                {/* Medio de Cultivo */}
+                <div className="space-y-2 md:col-span-2">
+                    <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                        <Droplets className="w-4 h-4 text-emerald-500" />
+                        Medio de Cultivo (Opcional)
+                    </label>
+                    <select
+                        value={formData.medioCultivoId || ''}
+                        onChange={(e) => setFormData({ ...formData, medioCultivoId: e.target.value ? parseInt(e.target.value) : undefined })}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium text-slate-900"
+                    >
+                        <option value="">Seleccionar medio...</option>
+                        {medios?.map(m => (
+                            <option key={m.id} value={m.id}>{m.nombre}</option>
+                        ))}
+                    </select>
+                </div>
+
+                {/* Notas */}
+                <div className="space-y-2 md:col-span-2">
                     <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
                         <FileText className="w-4 h-4 text-emerald-500" />
                         Notas de la Transición (Opcional)

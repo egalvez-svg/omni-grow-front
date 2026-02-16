@@ -419,6 +419,9 @@ export interface CreateCultivoDto {
 export interface CreateTransicionFaseDto {
     nuevaFaseId: number
     notas?: string
+    salaId?: number
+    camaId?: number
+    medioCultivoId?: number
 }
 
 export interface CreateMedioCultivoDto {
