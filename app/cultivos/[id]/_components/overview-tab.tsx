@@ -1,150 +1,163 @@
 'use client'
 
-import { TrendingUp, Sprout, Droplets, Dna, MapPin, Activity, Layers, ClipboardList, FileText } from 'lucide-react'
+import { TrendingUp, Sprout, Droplets, Dna, MapPin, Activity, Layers, ClipboardList, FileText, Calendar, ShieldCheck } from 'lucide-react'
 import { formatLocalDate } from '@/lib/utils/date-utils'
 import { PhaseTimeline } from '@/components/cultivos/phase-timeline'
+import { UnifiedTimeline } from '@/components/cultivos/unified-timeline'
 import { cn } from '@/lib/utils'
-import { Cultivo, NutricionSemanal } from '@/lib/types/api'
+import { Cultivo, NutricionSemanal, TimelineEvent, ControlPlaga } from '@/lib/types/api'
 
 interface OverviewTabProps {
     cultivo: Cultivo
     ultimoRiego: NutricionSemanal | null
+    ultimoControlPlaga: ControlPlaga | null
+    timeline: TimelineEvent[]
+    isLoadingTimeline?: boolean
 }
 
-export function OverviewTab({ cultivo, ultimoRiego }: OverviewTabProps) {
+export function OverviewTab({ cultivo, ultimoRiego, ultimoControlPlaga, timeline, isLoadingTimeline }: OverviewTabProps) {
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-8">
-                {/* Stats Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-                        <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
-                            <TrendingUp className="w-6 h-6" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
+            <div className="lg:col-span-2 space-y-4 md:space-y-8">
+                {/* Stats Grid - Bento Style (UI/UX Pro Max) */}
+                <div className="grid grid-cols-2 lg:grid-cols-3 @[800px]:grid-cols-5 gap-3 @[800px]:gap-4">
+                    <div className="bg-white p-2.5 @[800px]:p-6 rounded-xl @[800px]:rounded-3xl border border-slate-200 shadow-sm flex items-center @[800px]:flex-col @[800px]:items-start gap-2.5 @[800px]:gap-0">
+                        <div className="w-9 h-9 @[800px]:w-12 @[800px]:h-12 rounded-lg @[800px]:rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center @[800px]:mb-3 shrink-0">
+                            <TrendingUp className="w-4.5 h-4.5 @[800px]:w-6 @[800px]:h-6" />
                         </div>
-                        <span className="text-slate-400 text-sm font-bold uppercase tracking-wider block mb-1">Días de Ciclo</span>
-                        <p className="text-3xl font-black text-slate-900">{cultivo.dias_ciclo}</p>
+                        <div className="min-w-0">
+                            <span className="text-slate-400 text-[10px] @[800px]:text-sm font-black block mb-0 @[800px]:mb-1 truncate">Días Ciclo</span>
+                            <p className="text-xl @[800px]:text-3xl font-black text-slate-900 leading-none">{cultivo.dias_ciclo}</p>
+                        </div>
                     </div>
-                    <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-                        <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-4">
-                            <Sprout className="w-6 h-6" />
+
+                    <div className="bg-white p-2.5 @[800px]:p-6 rounded-xl @[800px]:rounded-3xl border border-slate-200 shadow-sm flex items-center @[800px]:flex-col @[800px]:items-start gap-2.5 @[800px]:gap-0">
+                        <div className="w-9 h-9 @[800px]:w-12 @[800px]:h-12 rounded-lg @[800px]:rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center @[800px]:mb-3 shrink-0">
+                            <Calendar className="w-4.5 h-4.5 @[800px]:w-6 @[800px]:h-6" />
                         </div>
-                        <span className="text-slate-400 text-sm font-bold uppercase tracking-wider block mb-1">Población</span>
-                        <p className="text-3xl font-black text-slate-900">
-                            {cultivo.plantas?.length || 0} / {cultivo.cantidad_plantas || 0}
-                        </p>
+                        <div className="min-w-0">
+                            <span className="text-slate-400 text-[10px] @[800px]:text-sm font-black block mb-0 @[800px]:mb-1 truncate">Inicio</span>
+                            <p className="text-sm @[800px]:text-xl font-black text-slate-900 leading-none">
+                                {formatLocalDate(cultivo.fecha_inicio, { day: '2-digit', month: '2-digit', year: '2-digit' })}
+                            </p>
+                        </div>
                     </div>
-                    <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-                        <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4">
-                            <Droplets className="w-6 h-6" />
+
+                    <div className="bg-white p-2.5 @[800px]:p-6 rounded-xl @[800px]:rounded-3xl border border-slate-200 shadow-sm flex items-center @[800px]:flex-col @[800px]:items-start gap-2.5 @[800px]:gap-0">
+                        <div className="w-9 h-9 @[800px]:w-12 @[800px]:h-12 rounded-lg @[800px]:rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center @[800px]:mb-3 shrink-0">
+                            <Sprout className="w-4.5 h-4.5 @[800px]:w-6 @[800px]:h-6" />
                         </div>
-                        <span className="text-slate-400 text-sm font-bold uppercase tracking-wider block mb-1">Último Riego</span>
-                        <p className="text-xl font-black text-slate-900">
-                            {ultimoRiego
-                                ? formatLocalDate(ultimoRiego.fecha_aplicacion, { day: '2-digit', month: '2-digit', year: '2-digit' })
-                                : 'Sin registros'}
-                        </p>
+                        <div className="min-w-0">
+                            <span className="text-slate-400 text-[10px] @[800px]:text-sm font-black block mb-0 @[800px]:mb-1 truncate">Plantas</span>
+                            <p className="text-xl @[800px]:text-3xl font-black text-slate-900 leading-none truncate">
+                                {cultivo.plantas?.length || 0} / {cultivo.cantidad_plantas || 0}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="bg-white p-2.5 @[800px]:p-6 rounded-xl @[800px]:rounded-3xl border border-slate-200 shadow-sm flex items-center @[800px]:flex-col @[800px]:items-start gap-2.5 @[800px]:gap-0">
+                        <div className="w-9 h-9 @[800px]:w-12 @[800px]:h-12 rounded-lg @[800px]:rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center @[800px]:mb-3 shrink-0">
+                            <Droplets className="w-4.5 h-4.5 @[800px]:w-6 @[800px]:h-6" />
+                        </div>
+                        <div className="min-w-0">
+                            <span className="text-slate-400 text-[10px] @[800px]:text-sm font-black block mb-0 @[800px]:mb-1 truncate">Último Riego</span>
+                            <p className="text-sm @[800px]:text-xl font-black text-slate-900 leading-none">
+                                {ultimoRiego
+                                    ? formatLocalDate(ultimoRiego.fecha_aplicacion, { day: '2-digit', month: '2-digit', year: '2-digit' })
+                                    : 'N/A'}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="col-span-2 @[800px]:col-span-1 bg-white p-2.5 @[800px]:p-6 rounded-xl @[800px]:rounded-3xl border border-slate-200 shadow-sm flex items-center @[800px]:flex-col @[800px]:items-start gap-2.5 @[800px]:gap-0">
+                        <div className="w-9 h-9 @[800px]:w-12 @[800px]:h-12 rounded-lg @[800px]:rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center @[800px]:mb-3 shrink-0">
+                            <ShieldCheck className="w-4.5 h-4.5 @[800px]:w-6 @[800px]:h-6" />
+                        </div>
+                        <div className="min-w-0">
+                            <span className="text-slate-400 text-[10px] @[800px]:text-sm font-black block mb-0 @[800px]:mb-1 truncate">Protección</span>
+                            <p className="text-sm @[800px]:text-xl font-black text-slate-900 leading-none">
+                                {ultimoControlPlaga
+                                    ? formatLocalDate(ultimoControlPlaga.fecha_aplicacion, { day: '2-digit', month: '2-digit', year: '2-digit' })
+                                    : 'N/A'}
+                            </p>
+                        </div>
                     </div>
                 </div>
 
-                {/* Historial de Fases (Timeline) */}
-                <section className="bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-sm">
-                    <div className="p-8 border-b border-slate-100 flex items-center justify-between">
-                        <h2 className="text-2xl font-bold text-slate-800">Línea de Tiempo del Ciclo</h2>
+                {/* Historial de Fases (Timeline) - Ultra Compacto */}
+                <section className="bg-white rounded-2xl @[800px]:rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div className="px-4 py-3 @[600px]:p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                        <h2 className="text-sm @[600px]:text-xl font-black">Línea de Tiempo del Ciclo</h2>
                     </div>
-                    <div className="p-8">
-                        <PhaseTimeline historial={cultivo.historialFases || []} />
+                    <div className="p-3 @[600px]:p-8">
+                        <UnifiedTimeline events={timeline} isLoading={isLoadingTimeline} />
                     </div>
                 </section>
             </div>
 
             <div className="space-y-8">
-                {/* Variety Detail */}
-                <section className="bg-slate-900 text-white rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-8 opacity-10">
-                        <Dna className="w-32 h-32" />
-                    </div>
-                    <h3 className="text-xl font-bold mb-6">Ficha Genética</h3>
-                    <div className="space-y-6 relative z-10">
-                        <div>
-                            <span className="text-slate-400 text-xs font-black uppercase tracking-[0.2em]">
-                                {cultivo.variedades && cultivo.variedades.length > 1 ? 'Variedades' : 'Variedad'}
-                            </span>
-                            <div className="mt-2 space-y-2">
-                                {cultivo.variedades && cultivo.variedades.length > 0 ? (
-                                    cultivo.variedades.map((variedad, index) => (
-                                        <div key={variedad.id || index} className="bg-slate-800/50 rounded-xl p-3 border border-slate-700">
-                                            <p className="text-lg font-bold text-sky-400">{variedad.nombre}</p>
-                                            {variedad.banco && (
-                                                <p className="text-sm text-slate-400 mt-1">Banco: {variedad.banco}</p>
-                                            )}
-                                            {variedad.tipo && (
-                                                <p className="text-xs text-slate-500 mt-1">Tipo: {variedad.tipo}</p>
-                                            )}
-                                        </div>
-                                    ))
-                                ) : cultivo.variedad ? (
-                                    <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700">
-                                        <p className="text-lg font-bold text-sky-400">{cultivo.variedad.nombre}</p>
-                                        {cultivo.variedad.banco && (
-                                            <p className="text-sm text-slate-400 mt-1">Banco: {cultivo.variedad.banco}</p>
-                                        )}
-                                        {cultivo.variedad.tipo && (
-                                            <p className="text-xs text-slate-500 mt-1">Tipo: {cultivo.variedad.tipo}</p>
-                                        )}
+                {/* Variety & Location - Compact Bento Side (UI/UX Pro Max) */}
+                <div className="grid grid-cols-1 @[500px]:grid-cols-2 lg:grid-cols-1 gap-4">
+                    {/* Variety Detail */}
+                    <section className="bg-slate-900 text-white rounded-3xl p-5 @[800px]:p-8 shadow-xl relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-10">
+                            <Dna className="w-16 h-16" />
+                        </div>
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-sm font-black tracking-widest text-sky-400">Genética</h3>
+                            {cultivo.variedades && cultivo.variedades.length > 1 && (
+                                <span className="bg-sky-500/20 text-sky-400 text-[10px] font-black px-2 py-0.5 rounded-lg border border-sky-500/30">
+                                    {cultivo.variedades.length} Variedades
+                                </span>
+                            )}
+                        </div>
+                        <div className="space-y-3 relative z-10 max-h-[200px] overflow-y-auto no-scrollbar pr-1">
+                            {cultivo.variedades && cultivo.variedades.length > 0 ? (
+                                cultivo.variedades.map((variedad, index) => (
+                                    <div key={variedad.id || index} className="bg-slate-800/50 rounded-xl p-3 border border-slate-700">
+                                        <p className="text-base font-black text-white leading-tight">{variedad.nombre}</p>
+                                        <p className="text-[10px] text-slate-400 mt-0.5 tracking-wider">{variedad.banco || 'Banco General'}</p>
                                     </div>
-                                ) : (
-                                    <p className="text-lg font-bold text-sky-400">Seleccionada</p>
-                                )}
-                            </div>
+                                ))
+                            ) : (
+                                <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700">
+                                    <p className="text-base font-black text-white leading-tight">{cultivo.variedad?.nombre || 'General'}</p>
+                                    <p className="text-[10px] text-slate-400 mt-0.5 tracking-wider">Por Defecto</p>
+                                </div>
+                            )}
                         </div>
-                    </div>
-                </section>
+                    </section>
 
-                {/* Location Detail */}
-                <section className="bg-white rounded-[2.5rem] border border-slate-200 p-8 shadow-sm">
-                    <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-                        <MapPin className="w-5 h-5 text-sky-500" />
-                        Ubicación
-                    </h3>
-                    <div className="space-y-3">
-                        <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 shadow-sm border border-slate-100">
-                                <Activity className="w-5 h-5" />
+                    {/* Location Detail */}
+                    <section className="bg-white rounded-3xl border border-slate-200 p-5 @[800px]:p-8 shadow-sm">
+                        <h3 className="flex items-center gap-2 text-sm font-black text-slate-900 tracking-widest mb-4">
+                            <MapPin className="w-4 h-4 text-indigo-500" />
+                            Ubicación
+                        </h3>
+                        <div className="grid grid-cols-1 gap-2">
+                            <div className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 border border-slate-100/50">
+                                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-slate-400 shadow-sm border border-slate-100 shrink-0">
+                                    <Activity className="w-4 h-4" />
+                                </div>
+                                <div>
+                                    <span className="text-[9px] font-black text-slate-400 leading-none block">Sala</span>
+                                    <p className="text-xs font-black text-slate-800 leading-tight truncate">{cultivo.sala?.nombre || 'N/A'}</p>
+                                </div>
                             </div>
-                            <div>
-                                <span className="text-[10px] font-bold text-slate-400 uppercase leading-none block mb-0.5">Sala</span>
-                                <p className="text-base font-bold text-slate-800 leading-tight">{cultivo.sala?.nombre || 'N/A'}</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 shadow-sm border border-slate-100">
-                                <Layers className="w-5 h-5" />
-                            </div>
-                            <div>
-                                <span className="text-[10px] font-bold text-slate-400 uppercase leading-none block mb-0.5">Cama</span>
-                                <p className="text-base font-bold text-slate-800 leading-tight">
-                                    {cultivo.cama?.nombre || 'N/A'}
-                                    {cultivo.cama && (
-                                        <span className="text-[10px] text-slate-400 ml-2 font-medium">
-                                            ({cultivo.cama.filas}x{cultivo.cama.columnas})
-                                        </span>
-                                    )}
-                                </p>
+                            <div className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 border border-slate-100/50">
+                                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-slate-400 shadow-sm border border-slate-100 shrink-0">
+                                    <Layers className="w-4 h-4" />
+                                </div>
+                                <div className="min-w-0">
+                                    <span className="text-[9px] font-black text-slate-400 leading-none block">Cama</span>
+                                    <p className="text-xs font-black text-slate-800 leading-tight truncate">
+                                        {cultivo.cama?.nombre || 'N/A'}
+                                    </p>
+                                </div>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-sky-500 shadow-sm border border-slate-100">
-                                <Droplets className="w-5 h-5" />
-                            </div>
-                            <div>
-                                <span className="text-[10px] font-bold text-slate-400 uppercase leading-none block mb-0.5">Medio de Cultivo</span>
-                                <p className="text-base font-bold text-slate-800 leading-tight">
-                                    {cultivo.medioCultivo?.nombre || 'N/D'}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                    </section>
+                </div>
             </div>
         </div>
     )

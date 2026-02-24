@@ -351,6 +351,11 @@ export interface Planta {
 }
 
 // --- Nutrición y Productos ---
+export interface ProductoTipo {
+    id: number
+    nombre: string
+    descripcion?: string
+}
 
 export interface Producto {
     id: number
@@ -358,6 +363,8 @@ export interface Producto {
     fabricante?: string
     descripcion?: string
     activo: boolean
+    tipoId?: number
+    tipo?: ProductoTipo
 }
 
 export interface NutricionSemanal {
@@ -381,6 +388,26 @@ export interface NutricionDetalle {
     productoNutricionId: number
     dosis_por_litro: number
     productoNutricion?: Producto
+}
+
+export interface ControlPlaga {
+    id: number
+    cultivoId: number
+    fecha_aplicacion: string
+    metodo_aplicacion: 'foliar' | 'riego' | 'manual' | 'otro'
+    notas?: string
+    productos?: ControlPlagaDetalle[]
+    creado_en?: string
+    actualizado_en?: string
+}
+
+export interface ControlPlagaDetalle {
+    id: number
+    controlPlagaId: number
+    productoId: number
+    cantidad: number
+    unidad: 'ml' | 'g'
+    producto?: Producto
 }
 
 // --- DTOs para nuevas entidades ---
@@ -409,11 +436,11 @@ export interface CreateCultivoDto {
     fecha_inicio: string
     variedadIds: number[]
     salaId: number
+    faseId: number
     camaId?: number
-    cantidad_plantas: number
-    estado?: CropStatus
-    faseId?: number
+    cantidad_plantas?: number
     medioCultivoId?: number
+    notas?: string
 }
 
 export interface CreateTransicionFaseDto {
@@ -457,6 +484,7 @@ export interface CreateProductoDto {
     fabricante?: string
     descripcion?: string
     activo?: boolean
+    tipoId?: number
 }
 
 export interface UpdateProductoDto extends Partial<CreateProductoDto> { }
@@ -479,6 +507,22 @@ export interface CreateNutricionDto {
 }
 
 export interface UpdateNutricionDto extends Partial<CreateNutricionDto> { }
+
+export interface CreateControlPlagaDetalleDto {
+    productoId: number
+    cantidad: number
+    unidad: 'ml' | 'g'
+}
+
+export interface CreateControlPlagaDto {
+    cultivoId: number
+    fecha_aplicacion: string
+    metodo_aplicacion: 'foliar' | 'riego' | 'manual' | 'otro'
+    notas?: string
+    productos: CreateControlPlagaDetalleDto[]
+}
+
+export interface UpdateControlPlagaDto extends Partial<CreateControlPlagaDto> { }
 
 // --- IA y Análisis ---
 
@@ -548,4 +592,40 @@ export interface CheckAIStatusResponse {
     snapshot?: any
     // For compatibility if backend keeps sending or we need to derive it
     existe?: boolean
+}
+// --- Línea de Tiempo Unificada ---
+
+export type TimelineEventType = 'nutricion' | 'control_plagas' | 'cambio_fase'
+
+export interface TimelineProduct {
+    nombre: string
+    cantidad: number
+    unidad: string
+    tipo?: string
+}
+
+export interface TimelineNutricionData {
+    tipo_riego: string
+    litros_agua: number
+    ph?: number
+    ec?: number
+    productos: TimelineProduct[]
+}
+
+export interface TimelineControlPlagaData {
+    metodo: string
+    productos: TimelineProduct[]
+}
+
+export interface TimelineCambioFaseData {
+    fase_anterior?: string
+    fase_nueva: string
+}
+
+export interface TimelineEvent {
+    id: string | number
+    tipo: TimelineEventType
+    fecha: string
+    datos: TimelineNutricionData | TimelineControlPlagaData | TimelineCambioFaseData
+    notas?: string
 }

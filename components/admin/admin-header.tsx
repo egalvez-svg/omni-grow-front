@@ -21,8 +21,8 @@ export function AdminHeader({ title, className = '' }: AdminHeaderProps) {
             <div className="px-6 py-4 flex items-center justify-between">
                 {/* Title */}
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
-                    <p className="text-sm text-gray-500 mt-1">Panel de Administración</p>
+                    <h1 className="text-[var(--text-2xl)] font-black text-slate-900 tracking-tight">{title}</h1>
+                    <p className="text-description mt-0.5">Gestión Administrativa</p>
                 </div>
 
                 {/* User info and logout */}

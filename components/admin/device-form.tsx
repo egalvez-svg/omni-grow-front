@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import type { CreateDispositivoDto, UpdateDispositivoDto, User } from '@/lib/types/api'
+import { Check, Plus, User as UserIcon } from 'lucide-react'
+import { Select } from '@/components/ui'
 
 interface DeviceFormProps {
     initialData?: UpdateDispositivoDto & { id?: number }
@@ -130,24 +132,19 @@ export function DeviceForm({ initialData, users, onSubmit, onCancel, isLoading }
             </div>
 
             {/* Usuario */}
-            <div>
-                <label htmlFor="usuarioId" className="block text-sm font-medium text-gray-700 mb-2">
-                    Usuario Propietario
-                </label>
-                <select
-                    id="usuarioId"
-                    value={formData.usuarioId || ''}
-                    onChange={(e) => handleChange('usuarioId', e.target.value ? Number(e.target.value) : undefined)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                    <option value="">Seleccionar usuario...</option>
-                    {users.map((user) => (
-                        <option key={user.id} value={user.id}>
-                            {user.nombre} {user.apellido_paterno} - {user.email}
-                        </option>
-                    ))}
-                </select>
-            </div>
+            <Select
+                label="Usuario Propietario"
+                icon={<UserIcon className="w-4 h-4" />}
+                value={formData.usuarioId || ''}
+                onChange={(e) => handleChange('usuarioId', e.target.value ? Number(e.target.value) : undefined)}
+            >
+                <option value="">Seleccionar usuario...</option>
+                {users.map((user) => (
+                    <option key={user.id} value={user.id}>
+                        {user.nombre} {user.apellido_paterno} - {user.email}
+                    </option>
+                ))}
+            </Select>
 
             {/* Buttons */}
             <div className="flex gap-3 justify-end pt-4">
@@ -155,22 +152,17 @@ export function DeviceForm({ initialData, users, onSubmit, onCancel, isLoading }
                     type="button"
                     onClick={onCancel}
                     disabled={isLoading}
-                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                    className="px-6 py-3 border border-slate-200 rounded-xl text-slate-400 font-black uppercase tracking-widest text-[10px] hover:bg-slate-50 transition-all disabled:opacity-50"
                 >
-                    Cancelar
+                    CANCELAR
                 </button>
                 <button
                     type="submit"
                     disabled={isLoading}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                    className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 disabled:opacity-50 flex items-center justify-center gap-2 active:scale-[0.98]"
                 >
-                    {isLoading && (
-                        <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                        </svg>
-                    )}
-                    {initialData?.id ? 'Actualizar' : 'Crear'} Dispositivo
+                    {isLoading ? 'PROCESANDO' : (initialData?.id ? 'ACTUALIZAR' : 'GUARDAR')}
+                    {!isLoading && (initialData?.id ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />)}
                 </button>
             </div>
         </form>

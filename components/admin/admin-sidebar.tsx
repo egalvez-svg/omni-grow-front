@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import { cn } from '@/lib/utils'
 import { SessionTimer } from '@/components/auth/session-timer'
 
 interface NavItem {
@@ -62,11 +63,12 @@ const navItems: NavItem[] = [
 
 interface AdminSidebarProps {
     className?: string
+    isCollapsed?: boolean
+    setIsCollapsed?: (collapsed: boolean) => void
 }
 
-export function AdminSidebar({ className = '' }: AdminSidebarProps) {
+export function AdminSidebar({ className = '', isCollapsed = false, setIsCollapsed }: AdminSidebarProps) {
     const pathname = usePathname()
-    const [isCollapsed, setIsCollapsed] = useState(false)
     const [isMobileOpen, setIsMobileOpen] = useState(false)
 
     return (
@@ -96,53 +98,49 @@ export function AdminSidebar({ className = '' }: AdminSidebarProps) {
             </button>
 
             <aside
-                className={`bg-gradient-to-b from-cyan-900 to-cyan-800 text-white transition-all duration-300 flex flex-col min-h-screen fixed lg:relative z-50 ${isCollapsed ? 'w-20' : 'w-64'
-                    } ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-                    } ${className}`}
+                className={cn(
+                    "fixed left-0 top-0 bottom-0 min-h-[100dvh] bg-white/80 backdrop-blur-xl border-r border-white/40 transition-all duration-300 z-50 flex flex-col shadow-2xl shadow-indigo-100/20",
+                    isCollapsed ? "w-20" : "w-64",
+                    isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+                    className
+                )}
             >
                 {/* Header */}
-                <div className={`border-b border-cyan-700 transition-all ${isCollapsed ? 'p-4' : 'p-6'}`}>
-                    <div className={`flex items-center ${isCollapsed ? 'flex-col gap-4 justify-center' : 'justify-between'}`}>
+                <div className={cn("border-b border-white/40 transition-all flex items-center h-16 px-4", isCollapsed ? "justify-center" : "justify-between")}>
+                    <Link href="/admin" className="flex items-center gap-2 overflow-hidden hover:opacity-80 transition-opacity">
+                        <div className="flex-shrink-0">
+                            <Image
+                                src="/icons/omnigrow_clean.png"
+                                alt="OmniGrow Logo"
+                                width={32}
+                                height={32}
+                                className="rounded-lg object-contain"
+                            />
+                        </div>
                         {!isCollapsed && (
-                            <div className="flex items-center gap-3">
-                                <Image
-                                    src="/icons/omnigrow_clean.png"
-                                    alt="OmniGrow Logo"
-                                    width={180}
-                                    height={45}
-                                    className="h-10 w-auto"
-                                />
-                            </div>
+                            <span className="font-black text-lg text-slate-900 whitespace-nowrap tracking-tight bg-gradient-to-r from-indigo-600 to-indigo-900 bg-clip-text text-transparent">
+                                OmniGrow
+                            </span>
                         )}
-                        {isCollapsed && (
-                            <div className="w-10 h-10 flex items-center justify-center mx-auto flex-shrink-0">
-                                <Image
-                                    src="/icons/omnigrow_clean.png"
-                                    alt="OmniGrow"
-                                    width={32}
-                                    height={32}
-                                    className="w-full h-full object-contain"
-                                />
-                            </div>
-                        )}
-                        <button
-                            onClick={() => setIsCollapsed(!isCollapsed)}
-                            className="p-2 hover:bg-cyan-700 rounded-lg transition-colors"
-                            aria-label={isCollapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
+                    </Link>
+
+                    <button
+                        onClick={() => setIsCollapsed?.(!isCollapsed)}
+                        className="p-2 hover:bg-slate-50 rounded-xl transition-all text-slate-400 hover:text-indigo-600"
+                        aria-label={isCollapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
+                    >
+                        <svg
+                            className={cn("w-5 h-5 transition-transform", isCollapsed ? 'rotate-180' : '')}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
                         >
-                            <svg
-                                className={`w-5 h-5 transition-transform ${isCollapsed ? 'rotate-180' : ''}`}
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-                            </svg>
-                        </button>
-                    </div>
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                        </svg>
+                    </button>
                 </div>
 
-                <nav className="flex-1 p-4 space-y-2">
+                <nav className="flex-1 p-3 space-y-1">
                     {navItems.map((item) => {
                         const isActive = pathname === item.href || (item.href !== '/admin' && pathname?.startsWith(item.href))
 
@@ -150,40 +148,48 @@ export function AdminSidebar({ className = '' }: AdminSidebarProps) {
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${isActive
-                                    ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/50'
-                                    : 'text-cyan-100 hover:bg-cyan-700 hover:text-white'
-                                    } ${isCollapsed ? 'justify-center' : ''}`}
+                                className={cn(
+                                    "flex items-center gap-3 px-3 py-2 rounded-xl transition-all group relative overflow-hidden",
+                                    isActive
+                                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20"
+                                        : "text-slate-500 hover:bg-white/60 hover:text-indigo-600 hover:shadow-sm",
+                                    isCollapsed ? "justify-center" : ""
+                                )}
                                 title={isCollapsed ? item.name : undefined}
                             >
-                                {item.icon}
-                                {!isCollapsed && <span className="font-medium">{item.name}</span>}
+                                <div className={cn("transition-transform duration-300 group-hover:scale-110", isActive ? "text-white" : "text-slate-400 group-hover:text-indigo-500")}>
+                                    {item.icon}
+                                </div>
+                                {!isCollapsed && <span className="font-black text-[13px] uppercase tracking-tight">{item.name}</span>}
                             </Link>
                         )
                     })}
 
-                    <div className="pt-4 mt-4 border-t border-cyan-700">
+                    <div className="pt-2 mt-2 border-t border-slate-100">
                         <Link
                             href="/select-role"
-                            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-cyan-100 hover:bg-cyan-700 hover:text-white ${isCollapsed ? 'justify-center' : ''}`}
+                            className={cn(
+                                "flex items-center gap-3 px-3 py-2 rounded-xl transition-all text-slate-500 hover:bg-slate-50 hover:text-indigo-600",
+                                isCollapsed ? "justify-center" : ""
+                            )}
                             title={isCollapsed ? 'Cambiar Rol' : undefined}
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                             </svg>
-                            {!isCollapsed && <span className="font-medium">Cambiar Rol</span>}
+                            {!isCollapsed && <span className="font-black text-[11px] uppercase tracking-widest">Cambiar Rol</span>}
                         </Link>
                     </div>
                 </nav>
 
                 {!isCollapsed && (
-                    <div className="p-4 border-t border-cyan-700 space-y-4">
+                    <div className="p-3 border-t border-slate-100 space-y-2">
                         <div className="px-3">
                             <SessionTimer />
                         </div>
-                        <div className="text-xs text-cyan-300 text-center">
+                        <div className="text-[10px] text-slate-400 text-center font-black uppercase tracking-[0.2em] opacity-60">
                             <p>Sistema de Control</p>
-                            <p className="mt-1">v1.0.0</p>
+                            <p className="mt-1">v1.2.0 PRO MAX</p>
                         </div>
                     </div>
                 )}

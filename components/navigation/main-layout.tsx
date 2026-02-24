@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+import { cn } from '@/lib/utils'
 import { useAuthContext } from '@/lib/auth/auth-context'
 import { Sidebar } from './sidebar'
 import { usePathname } from 'next/navigation'
@@ -8,6 +10,7 @@ import { SessionExpiryNotification } from '../auth/session-expiry-notification'
 export function MainLayout({ children }: { children: React.ReactNode }) {
     const { isAuthenticated, isLoading, selectedRole } = useAuthContext()
     const pathname = usePathname()
+    const [isCollapsed, setIsCollapsed] = useState(false)
 
     // Solo mostrar el Sidebar cuando:
     // 1. Está autenticado
@@ -35,9 +38,12 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
     }
 
     return (
-        <div className="flex min-h-screen bg-white">
-            <Sidebar />
-            <main className="flex-1 lg:pl-64 transition-all duration-300">
+        <div className="flex min-h-screen bg-transparent">
+            <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+            <main className={cn(
+                "flex-1 transition-all duration-300 p-[var(--space-md)]",
+                isCollapsed ? "lg:pl-28" : "lg:pl-80"
+            )}>
                 {children}
             </main>
             <SessionExpiryNotification />

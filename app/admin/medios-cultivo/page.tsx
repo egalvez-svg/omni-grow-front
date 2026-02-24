@@ -83,7 +83,7 @@ export default function MediosCultivoPage() {
                             className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-md"
                         >
                             <Plus className="w-5 h-5 mr-2" />
-                            Nuevo Medio
+                            AÑADIR
                         </Button>
                     </div>
 

@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthContext } from '@/lib/auth/auth-context'
 import { AdminSidebar } from '@/components/admin'
 import { DashboardHeader } from '@/components/dashboard'
 import { LoadingSpinner } from '@/components/ui'
 import { SessionExpiryNotification } from '@/components/auth/session-expiry-notification'
+import { cn } from '@/lib/utils'
 
 export default function AdminLayout({
     children,
@@ -15,6 +16,7 @@ export default function AdminLayout({
 }) {
     const router = useRouter()
     const { user, selectedRole, isLoading, isAuthenticated } = useAuthContext()
+    const [isCollapsed, setIsCollapsed] = useState(false)
 
     useEffect(() => {
         if (!isLoading) {
@@ -59,13 +61,18 @@ export default function AdminLayout({
     }
 
     return (
-        <div className="flex h-screen bg-gradient-to-br from-sky-50 via-cyan-25 to-blue-50">
-            <AdminSidebar />
+        <div className="flex h-screen bg-gradient-to-br from-sky-50 via-cyan-25 to-blue-50 relative">
+            <AdminSidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
 
-            <div className="flex-1 flex flex-col overflow-hidden">
+            <div className={cn(
+                "flex-1 flex flex-col overflow-hidden transition-all duration-300",
+                isCollapsed ? "lg:pl-28" : "lg:pl-80"
+            )}>
                 <DashboardHeader title="Panel de Administración" />
 
-                {children}
+                <div className="flex-1 overflow-y-auto">
+                    {children}
+                </div>
             </div>
             <SessionExpiryNotification />
         </div>

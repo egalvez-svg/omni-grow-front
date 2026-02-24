@@ -65,16 +65,16 @@ export function MedioCultivoForm({ medio, onSubmit, onCancel, isLoading }: Medio
                     disabled={isLoading}
                     className="flex-1"
                 >
-                    Cancelar
+                    CANCELAR
                 </Button>
                 <Button
                     type="submit"
                     variant="primary"
                     loading={isLoading}
                     disabled={isLoading}
-                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20"
+                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20"
                 >
-                    {medio ? 'Guardar Cambios' : 'Crear Medio'}
+                    {medio ? 'ACTUALIZAR' : 'GUARDAR'}
                 </Button>
             </div>
         </form>

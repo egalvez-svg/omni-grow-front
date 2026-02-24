@@ -92,7 +92,7 @@ export default function ModulosPage() {
                             className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md rounded-2xl"
                         >
                             <Plus className="w-5 h-5 mr-2" />
-                            Nuevo Módulo
+                            AÑADIR
                         </Button>
                     </div>
 
@@ -132,8 +132,8 @@ export default function ModulosPage() {
                                                 <td className="px-8 py-6 whitespace-nowrap">
                                                     <div className="flex items-center gap-4">
                                                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${modulo.activo
-                                                                ? 'bg-cyan-50 text-cyan-600 group-hover:bg-cyan-600 group-hover:text-white'
-                                                                : 'bg-slate-100 text-slate-400'
+                                                            ? 'bg-cyan-50 text-cyan-600 group-hover:bg-cyan-600 group-hover:text-white'
+                                                            : 'bg-slate-100 text-slate-400'
                                                             }`}>
                                                             {getIconComponent(modulo.nombre)}
                                                         </div>
@@ -153,8 +153,8 @@ export default function ModulosPage() {
                                                 </td>
                                                 <td className="px-8 py-6 whitespace-nowrap">
                                                     <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${modulo.activo
-                                                            ? 'bg-emerald-50 text-emerald-600'
-                                                            : 'bg-slate-100 text-slate-400'
+                                                        ? 'bg-emerald-50 text-emerald-600'
+                                                        : 'bg-slate-100 text-slate-400'
                                                         }`}>
                                                         <Circle className={`w-2 h-2 fill-current ${modulo.activo ? 'animate-pulse' : ''}`} />
                                                         {modulo.activo ? 'Activo' : 'Inactivo'}

@@ -1,11 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createProducto, updateProducto } from '@/lib/api/catalogos-service'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { createProducto, updateProducto, fetchProductoTipos } from '@/lib/api/catalogos-service'
 import { CreateProductoDto, Producto } from '@/lib/types/api'
-import { Plus, ShoppingBag, AlignLeft, Tag, Activity, Save } from 'lucide-react'
+import { Plus, ShoppingBag, AlignLeft, Tag, Activity, Check } from 'lucide-react'
 import { ErrorMessage } from '@/components/ui/error-message'
+import { Select } from '@/components/ui'
 import { useToast } from '@/providers/toast-provider'
 
 interface CreateProductoFormProps {
@@ -21,7 +22,13 @@ export function CreateProductoForm({ onSuccess, onCancel, initialData }: CreateP
         nombre: initialData?.nombre || '',
         fabricante: initialData?.fabricante || '',
         descripcion: initialData?.descripcion || '',
-        activo: initialData?.activo ?? true
+        activo: initialData?.activo ?? true,
+        tipoId: initialData?.tipoId || undefined
+    })
+
+    const { data: tipos = [] } = useQuery({
+        queryKey: ['productos-tipos'],
+        queryFn: fetchProductoTipos
     })
 
     const mutation = useMutation({
@@ -100,13 +107,26 @@ export function CreateProductoForm({ onSuccess, onCancel, initialData }: CreateP
                     />
                 </div>
 
+                {/* Tipo de Producto */}
+                <Select
+                    label="Categoría de Producto"
+                    required
+                    icon={<Activity className="w-4 h-4" />}
+                    value={formData.tipoId || ''}
+                    onChange={(e) => setFormData({ ...formData, tipoId: parseInt(e.target.value) })}
+                >
+                    <option value="" disabled>Selecciona una categoría...</option>
+                    {tipos.map(tipo => (
+                        <option key={tipo.id} value={tipo.id}>{tipo.nombre}</option>
+                    ))}
+                </Select>
+
                 {/* Estado */}
                 <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-2xl">
                     <div className="flex items-center gap-3">
                         <Activity className="w-5 h-5 text-emerald-500" />
                         <div>
                             <p className="text-sm font-bold text-slate-800">Producto Activo</p>
-                            <p className="text-xs text-slate-500">Disponible para planes de nutrición</p>
                         </div>
                     </div>
                     <input
@@ -131,17 +151,17 @@ export function CreateProductoForm({ onSuccess, onCancel, initialData }: CreateP
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="flex-1 px-6 py-3 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-all"
+                    className="flex-1 px-6 py-3 border border-slate-200 text-slate-600 font-black uppercase tracking-widest text-[11px] rounded-xl hover:bg-slate-50 transition-all"
                 >
-                    Cancelar
+                    CANCELAR
                 </button>
                 <button
                     type="submit"
                     disabled={mutation.isPending}
-                    className="flex-1 px-6 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="flex-1 px-6 py-3 bg-indigo-600 text-white font-black uppercase tracking-widest text-[11px] rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                    {mutation.isPending ? 'Guardando...' : initialData ? 'Actualizar Producto' : 'Guardar'}
-                    {!mutation.isPending && (initialData ? <Save className="w-5 h-5" /> : <Plus className="w-5 h-5" />)}
+                    {mutation.isPending ? 'PROCESANDO' : (initialData ? 'ACTUALIZAR' : 'GUARDAR')}
+                    {!mutation.isPending && (initialData ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />)}
                 </button>
             </div>
         </form>

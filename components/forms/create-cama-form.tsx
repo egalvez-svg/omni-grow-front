@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createCama, updateCama } from '@/lib/api/camas-service'
 import { CreateCamaDto, Cama } from '@/lib/types/api'
-import { Plus, Layers, AlignLeft, Grid, Hash, Save } from 'lucide-react'
+import { Plus, Layers, AlignLeft, Grid, Hash, Check } from 'lucide-react'
 import { ErrorMessage } from '@/components/ui/error-message'
 import { useToast } from '@/providers/toast-provider'
 
@@ -142,19 +142,19 @@ export function CreateCamaForm({ salaId, initialData, onSuccess, onCancel }: Cre
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="flex-1 px-6 py-3 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-all"
+                    className="flex-1 px-6 py-3 border border-slate-200 text-slate-400 font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-slate-50 transition-all active:scale-95"
                 >
-                    Cancelar
+                    CANCELAR
                 </button>
                 <button
                     type="submit"
                     disabled={mutation.isPending}
-                    className={`flex-1 px-6 py-3 ${isEdit ? 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20'} text-white font-bold rounded-xl transition-all shadow-lg disabled:opacity-50 flex items-center justify-center gap-2`}
+                    className="flex-[1.5] px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-widest text-[10px] rounded-xl transition-all shadow-lg shadow-indigo-600/20 disabled:opacity-50 flex items-center justify-center gap-2 active:scale-95"
                 >
                     {mutation.isPending
-                        ? (isEdit ? 'Guardando...' : 'Creando...')
-                        : (isEdit ? 'Guardar Cambios' : 'Crear Superficie')}
-                    {!mutation.isPending && (isEdit ? <Save className="w-5 h-5" /> : <Plus className="w-5 h-5" />)}
+                        ? 'PROCESANDO'
+                        : (isEdit ? 'ACTUALIZAR' : 'GUARDAR')}
+                    {!mutation.isPending && (isEdit ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />)}
                 </button>
             </div>
         </form>

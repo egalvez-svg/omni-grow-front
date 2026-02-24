@@ -1,5 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
-import { fetchCultivoById, fetchNutricionHistorial } from '@/lib/api/cultivos-service'
+import {
+    fetchCultivoById,
+    fetchNutricionHistorial,
+    fetchControlPlagasHistorial,
+    fetchCultivoTimeline
+} from '@/lib/api/cultivos-service'
 
 export function useCultivo(cultivoId: number) {
     const { data: cultivo, isLoading: cultivoLoading, error: cultivoError, refetch: refetchCultivo } = useQuery({
@@ -14,10 +19,24 @@ export function useCultivo(cultivoId: number) {
         enabled: !!cultivoId
     })
 
+    const { data: historialControlPlagas = [], isLoading: plagasLoading } = useQuery({
+        queryKey: ['control-plagas', cultivoId],
+        queryFn: () => fetchControlPlagasHistorial(cultivoId),
+        enabled: !!cultivoId
+    })
+
+    const { data: timeline = [], isLoading: timelineLoading } = useQuery({
+        queryKey: ['timeline', cultivoId],
+        queryFn: () => fetchCultivoTimeline(cultivoId),
+        enabled: !!cultivoId
+    })
+
     return {
         cultivo,
         historialNutricion,
-        isLoading: cultivoLoading || nutricionLoading,
+        historialControlPlagas,
+        timeline,
+        isLoading: cultivoLoading || nutricionLoading || plagasLoading || timelineLoading,
         error: cultivoError,
         refetchCultivo
     }

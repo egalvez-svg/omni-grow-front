@@ -188,7 +188,7 @@ export function UserForm({ user, onSubmit, onCancel, isLoading = false }: UserFo
                     onClick={onCancel}
                     disabled={isLoading}
                 >
-                    Cancelar
+                    CANCELAR
                 </Button>
                 <Button
                     type="submit"
@@ -196,7 +196,7 @@ export function UserForm({ user, onSubmit, onCancel, isLoading = false }: UserFo
                     loading={isLoading}
                     disabled={isLoading}
                 >
-                    {isEditMode ? 'Actualizar Usuario' : 'Crear Usuario'}
+                    {isEditMode ? 'ACTUALIZAR' : 'CREAR'}
                 </Button>
             </div>
         </form>

@@ -1,9 +1,9 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { formatTimestamp, type SensorType, type TimeRange } from '@/lib/utils/mock-sensor-data'
 import { fetchHistoricalData } from '@/lib/api/devices-service'
+import { useMemo } from 'react'
 
 interface SensorChartProps {
     sensorType: SensorType
@@ -28,49 +28,54 @@ export function SensorChart({ sensorType, sensorId, deviceId, currentValue, unit
     const { data: historicalData, isLoading } = useQuery({
         queryKey: ['historicalData', deviceId, sensorId, horas],
         queryFn: () => fetchHistoricalData(deviceId, horas),
-        refetchInterval: 60000, // Refetch every minute
+        refetchInterval: 60000,
     })
 
-    // Find data for this specific sensor
     const sensorData = historicalData?.sensores.find(s => s.sensorId === sensorId)
 
-    // Format data for Recharts
-    const chartData = sensorData?.datos.map(reading => ({
-        time: formatTimestamp(reading.timestamp, timeRange),
-        value: reading.valor,
-        fullTimestamp: reading.timestamp
-    })) || []
+    // Calculate Sparkline Data
+    const sparklineData = useMemo(() => {
+        if (!sensorData?.datos || sensorData.datos.length === 0) return null
+
+        const data = sensorData.datos.map(d => d.valor)
+        const min = Math.min(...data)
+        const max = Math.max(...data)
+        const range = max - min || 1
+
+        // Dimensions
+        const width = 100
+        const height = 100 // Internal SVG coordinate system
+        const padding = 5
+
+        // Generate points
+        const points = data.map((val, i) => {
+            const x = (i / (data.length - 1)) * (width - 2 * padding) + padding
+            // Invert Y because SVG connects from top-left
+            const normalizedY = (val - min) / range
+            const y = height - (normalizedY * (height - 2 * padding) + padding)
+            return `${x},${y}`
+        }).join(' ')
+
+        // Create fill path (close the loop at the bottom)
+        const firstPoint = points.split(' ')[0]
+        const lastPoint = points.split(' ')[points.split(' ').length - 1]
+        const fillPath = `M ${firstPoint.split(',')[0]},${height} L ${points} L ${lastPoint.split(',')[0]},${height} Z`
+
+        return { points, fillPath, min, max }
+    }, [sensorData])
 
     const getColors = () => {
         switch (sensorType) {
             case 'temperatura':
-                return {
-                    stroke: '#d97706',
-                    fill: 'url(#colorTemp)',
-                    gradient1: '#fbbf24',
-                    gradient2: '#92400e'
-                }
+                return { stroke: '#f59e0b', fill: '#fef3c7' } // amber-500, amber-100
             case 'humedad':
-                return {
-                    stroke: '#0891b2',
-                    fill: 'url(#colorHum)',
-                    gradient1: '#22d3ee',
-                    gradient2: '#164e63'
-                }
+                return { stroke: '#06b6d4', fill: '#cffafe' } // cyan-500, cyan-100
             case 'vpd':
-                return {
-                    stroke: '#7c3aed',
-                    fill: 'url(#colorVpd)',
-                    gradient1: '#a78bfa',
-                    gradient2: '#4c1d95'
-                }
+                return { stroke: '#8b5cf6', fill: '#ede9fe' } // violet-500, violet-100
             case 'co2':
-                return {
-                    stroke: '#059669',
-                    fill: 'url(#colorCo2)',
-                    gradient1: '#34d399',
-                    gradient2: '#064e3b'
-                }
+                return { stroke: '#10b981', fill: '#d1fae5' } // emerald-500, emerald-100
+            default:
+                return { stroke: '#64748b', fill: '#f1f5f9' }
         }
     }
 
@@ -80,7 +85,7 @@ export function SensorChart({ sensorType, sensorId, deviceId, currentValue, unit
         return (
             <div className="space-y-2 animate-pulse">
                 <div className="h-4 bg-slate-200 rounded w-3/4"></div>
-                <div className="h-20 bg-slate-200 rounded"></div>
+                <div className="h-16 bg-slate-200 rounded"></div>
             </div>
         )
     }
@@ -95,6 +100,7 @@ export function SensorChart({ sensorType, sensorId, deviceId, currentValue, unit
                                 sensorType === 'vpd' ? 'bg-violet-100' :
                                     'bg-emerald-100'
                             }`}>
+                            {/* Icons rendered conditionally based on type */}
                             {sensorType === 'temperatura' && (
                                 <svg className="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -130,64 +136,17 @@ export function SensorChart({ sensorType, sensorId, deviceId, currentValue, unit
                 </div>
             </div>
 
-            <div className="h-20 -mx-2">
-                <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-                        <defs>
-                            <linearGradient id="colorTemp" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor={colors.gradient1} stopOpacity={0.3} />
-                                <stop offset="95%" stopColor={colors.gradient2} stopOpacity={0.05} />
-                            </linearGradient>
-                            <linearGradient id="colorHum" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor={colors.gradient1} stopOpacity={0.3} />
-                                <stop offset="95%" stopColor={colors.gradient2} stopOpacity={0.05} />
-                            </linearGradient>
-                            <linearGradient id="colorVpd" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor={colors.gradient1} stopOpacity={0.3} />
-                                <stop offset="95%" stopColor={colors.gradient2} stopOpacity={0.05} />
-                            </linearGradient>
-                            <linearGradient id="colorCo2" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor={colors.gradient1} stopOpacity={0.3} />
-                                <stop offset="95%" stopColor={colors.gradient2} stopOpacity={0.05} />
-                            </linearGradient>
-                        </defs>
-                        <XAxis
-                            dataKey="time"
-                            tick={{ fontSize: 9, fill: '#94a3b8' }}
-                            tickLine={false}
-                            axisLine={false}
-                            interval="preserveStartEnd"
-                            minTickGap={50}
-                        />
-                        <YAxis
-                            tick={{ fontSize: 9, fill: '#94a3b8' }}
-                            tickLine={false}
-                            axisLine={false}
-                            domain={['auto', 'auto']}
-                            width={35}
-                        />
-                        <Tooltip
-                            contentStyle={{
-                                backgroundColor: '#1e293b',
-                                border: 'none',
-                                borderRadius: '8px',
-                                fontSize: '11px',
-                                color: '#f1f5f9',
-                                padding: '6px 10px'
-                            }}
-                            labelStyle={{ color: '#cbd5e1', fontSize: '10px' }}
-                            formatter={(value: number) => [`${value} ${unit}`, label]}
-                        />
-                        <Area
-                            type="monotone"
-                            dataKey="value"
-                            stroke={colors.stroke}
-                            strokeWidth={2}
-                            fill={colors.fill}
-                            animationDuration={800}
-                        />
-                    </AreaChart>
-                </ResponsiveContainer>
+            <div className="h-16 w-full -mx-1 relative overflow-hidden">
+                {sparklineData ? (
+                    <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full">
+                        <path d={sparklineData.fillPath} fill={colors.fill} fillOpacity="0.4" />
+                        <polyline points={sparklineData.points} fill="none" stroke={colors.stroke} strokeWidth="2.5" vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center text-[10px] text-slate-300 italic">
+                        Sin datos históricos
+                    </div>
+                )}
             </div>
         </div>
     )

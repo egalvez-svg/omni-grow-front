@@ -53,7 +53,7 @@ export function DashboardHeader({
 
     return (
         <div className={`bg-white border-b border-gray-200 ${className}`}>
-            <div className="flex justify-between items-center px-6 py-4">
+            <div className="flex justify-between items-center px-4 py-2 md:px-6 md:py-4">
                 <div className="flex items-center gap-4">
 
                 </div>
@@ -73,14 +73,14 @@ export function DashboardHeader({
                                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                                 className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
                             >
-                                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold shadow-md">
+                                <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-sm md:text-base font-semibold shadow-md">
                                     {getUserInitials()}
                                 </div>
 
                                 <div className="text-left hidden md:block">
-                                    <p className="text-sm font-medium text-gray-900">{user.nombre}</p>
+                                    <p className="text-[var(--text-sm)] font-black text-gray-900 tracking-tight">{user.nombre}</p>
                                     {selectedRole && (
-                                        <p className="text-xs text-gray-500">Rol: {selectedRole.nombre}</p>
+                                        <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Rol: {selectedRole.nombre}</p>
                                     )}
                                 </div>
 

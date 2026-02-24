@@ -21,7 +21,8 @@ import {
     Layout,
     Edit2,
     Sprout,
-    Cpu
+    Cpu,
+    ChevronRight
 } from 'lucide-react'
 import { useState } from 'react'
 import { Modal } from '@/components/ui/modal'
@@ -67,7 +68,7 @@ export default function SalaDetailPage() {
     const deleteCamaMutation = useMutation({
         mutationFn: (camaId: number) => deleteCama(camaId),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['camas-sala', id] })
+            queryClient.invalidateQueries({ queryKey: ['camas', id] })
             showToast('Cama eliminada correctamente', 'success')
         },
         onError: () => {
@@ -107,16 +108,16 @@ export default function SalaDetailPage() {
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => router.back()}
-                            className="p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-sky-600 hover:border-sky-200 transition-all"
+                            className="p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm active:scale-95"
                         >
                             <ArrowLeft className="w-5 h-5" />
                         </button>
                         <div>
-                            <div className="flex items-center gap-2 text-slate-400 text-sm mb-1 uppercase tracking-wider font-semibold">
-                                <Layout className="w-4 h-4" />
+                            <div className="flex items-center gap-2 text-description text-[11px] mb-1 uppercase tracking-widest font-black opacity-70">
+                                <Layout className="w-3.5 h-3.5 text-indigo-500" />
                                 <span>Salas de Cultivo</span>
                             </div>
-                            <h1 className="text-3xl font-bold text-slate-900 leading-tight">
+                            <h1 className="text-[var(--text-3xl)] font-black text-slate-900 leading-tight">
                                 {sala.nombre}
                             </h1>
                         </div>
@@ -125,25 +126,25 @@ export default function SalaDetailPage() {
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => setIsEditSalaModalOpen(true)}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-600 font-semibold rounded-xl hover:bg-slate-50 transition-all"
+                            className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-600 font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-slate-50 transition-all shadow-sm active:scale-95"
                         >
                             <Settings className="w-4 h-4" />
-                            Editar Sala
+                            CONFIGURAR
                         </button>
                         <button
                             onClick={handleDeleteSala}
                             disabled={deleteSalaMutation.isPending}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-white border border-red-200 text-red-600 font-semibold rounded-xl hover:bg-red-50 transition-all disabled:opacity-50"
+                            className="flex items-center gap-2 px-5 py-2.5 bg-white border border-red-200 text-red-600 font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-red-50 transition-all disabled:opacity-50 active:scale-95"
                         >
                             <Trash2 className="w-4 h-4" />
-                            Eliminar Sala
+                            ELIMINAR
                         </button>
                         <button
                             onClick={() => setIsAddCamaModalOpen(true)}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-sky-600 text-white font-semibold rounded-xl hover:bg-sky-700 transition-all shadow-lg shadow-sky-600/20"
+                            className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 active:scale-95"
                         >
                             <Plus className="w-4 h-4" />
-                            Nueva Superficie
+                            AÑADIR CAMA
                         </button>
                     </div>
                 </div>
@@ -157,10 +158,10 @@ export default function SalaDetailPage() {
                                     <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
                                         <Layers className="w-5 h-5" />
                                     </div>
-                                    <h2 className="text-xl font-bold text-slate-800">Superficies de cultivo en esta Sala</h2>
+                                    <h2>Superficies de cultivo en esta Sala</h2>
                                 </div>
                                 <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-sm font-bold">
-                                    {camas?.length || 0} Superficies
+                                    {camas?.length || 0} {camas?.length === 1 ? 'Superficie' : 'Superficies'}
                                 </span>
                             </div>
 
@@ -177,10 +178,13 @@ export default function SalaDetailPage() {
                                                 <div
                                                     key={cama.id}
                                                     onClick={() => router.push(`/camas/${cama.id}`)}
-                                                    className="p-5 border border-slate-100 rounded-2xl hover:border-sky-200 hover:bg-sky-50/30 transition-all group cursor-pointer relative"
+                                                    className="p-6 border border-slate-100 rounded-3xl hover:border-indigo-100 hover:shadow-xl transition-all group cursor-pointer relative flex flex-col h-full bg-white overflow-hidden"
                                                 >
-                                                    <div className="flex items-center justify-between mb-3 relative z-10">
-                                                        <h4 className="font-bold text-slate-800 group-hover:text-sky-600 transition-colors">
+                                                    {/* Pro Max Decorative Blob */}
+                                                    <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-indigo-500/10 to-sky-500/10 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-150 duration-500" />
+
+                                                    <div className="flex items-center justify-between mb-4 relative z-10">
+                                                        <h4 className="font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">
                                                             {cama.nombre}
                                                         </h4>
                                                         <div className="flex items-center gap-1">
@@ -203,16 +207,16 @@ export default function SalaDetailPage() {
                                                     </div>
 
                                                     {cultivoActivo ? (
-                                                        <div className="mb-4 p-3 bg-emerald-50 rounded-xl border border-emerald-100/50">
-                                                            <div className="flex items-center gap-2 text-emerald-700 font-bold text-xs mb-1">
+                                                        <div className="mb-4 p-4 bg-emerald-50 rounded-2xl border border-emerald-100/50 relative z-10">
+                                                            <div className="flex items-center gap-2 text-emerald-700 font-black text-xs mb-1 uppercase tracking-tight">
                                                                 <Sprout className="w-3.5 h-3.5" />
                                                                 {cultivoActivo.nombre}
                                                             </div>
                                                             <div className="flex items-center justify-between">
-                                                                <span className="text-[10px] text-emerald-600/70 font-bold uppercase tracking-wider">
+                                                                <span className="text-[10px] text-emerald-600/70 font-black uppercase tracking-widest">
                                                                     {cultivoActivo.estado}
                                                                 </span>
-                                                                <span className="text-[10px] text-emerald-600/70 font-bold">
+                                                                <span className="text-[10px] text-emerald-600/70 font-black">
                                                                     Día {cultivoActivo.dias_ciclo || 0}
                                                                 </span>
                                                             </div>
@@ -223,7 +227,7 @@ export default function SalaDetailPage() {
                                                         </p>
                                                     )}
 
-                                                    <div className="flex items-center justify-between mt-auto">
+                                                    <div className="flex items-center justify-between mt-auto mb-4">
                                                         <div className="flex items-center gap-3 text-xs text-slate-400">
                                                             <span className="flex items-center gap-1.5">
                                                                 <Calendar className="w-3.5 h-3.5" />
@@ -235,6 +239,11 @@ export default function SalaDetailPage() {
                                                                 Superficie {cama.filas}x{cama.columnas}
                                                             </span>
                                                         )}
+                                                    </div>
+
+                                                    <div className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-slate-50 text-slate-700 font-black uppercase tracking-widest text-[10px] group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 group/btn relative z-10 shadow-sm group-hover:shadow-indigo-600/20">
+                                                        VER DETALLE
+                                                        <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                                                     </div>
                                                 </div>
                                             )
@@ -253,7 +262,7 @@ export default function SalaDetailPage() {
                     <div className="space-y-6">
                         <section className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
                             <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
-                                <Settings className="w-5 h-5 text-sky-500" />
+                                <Settings className="w-5 h-5 text-indigo-500" />
                                 Información de Sala
                             </h3>
 
@@ -279,7 +288,7 @@ export default function SalaDetailPage() {
                         {user?.modulos?.some(m => m.slug === 'dispositivos') && (
                             <section className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
                                 <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
-                                    <Cpu className="w-5 h-5 text-sky-500" />
+                                    <Cpu className="w-5 h-5 text-indigo-500" />
                                     Dispositivos
                                 </h3>
 
@@ -289,13 +298,13 @@ export default function SalaDetailPage() {
                                             <div
                                                 key={device.id}
                                                 onClick={() => router.push(`/dispositivos/${device.id}`)}
-                                                className="p-3 bg-slate-50 border border-slate-100 rounded-2xl flex items-center gap-3 cursor-pointer hover:bg-sky-50 hover:border-sky-100 transition-all group"
+                                                className="p-3 bg-slate-50 border border-slate-100 rounded-2xl flex items-center gap-3 cursor-pointer hover:bg-indigo-50 hover:border-indigo-100 transition-all group"
                                             >
-                                                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 group-hover:text-sky-500 shadow-sm transition-colors">
+                                                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 group-hover:text-indigo-500 shadow-sm transition-colors">
                                                     <Cpu className="w-5 h-5" />
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-bold text-slate-700 group-hover:text-sky-900 transition-colors">
+                                                    <p className="text-sm font-bold text-slate-700 group-hover:text-indigo-900 transition-colors">
                                                         {device.nombre}
                                                     </p>
                                                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">

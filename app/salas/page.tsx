@@ -49,16 +49,16 @@ export default function SalasPage() {
             <div className="max-w-7xl mx-auto px-6 py-8">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Gestión de Salas</h1>
-                        <p className="text-slate-500 mt-1">Administra tus espacios de cultivo y sus configuraciones.</p>
+                        <h1 className="text-[var(--text-3xl)] font-black text-slate-900 tracking-tight">Gestión de Salas</h1>
+                        <p className="text-description mt-1">Administra tus espacios de cultivo y sus configuraciones.</p>
                     </div>
 
                     <button
                         onClick={() => setIsModalOpen(true)}
-                        className="flex items-center justify-center gap-2 px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl transition-all shadow-lg shadow-sky-600/20 group"
+                        className="flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-widest text-[10px] rounded-xl transition-all shadow-lg shadow-indigo-600/20 group"
                     >
                         <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-                        Nueva Sala
+                        AÑADIR
                     </button>
                 </div>
 
@@ -89,15 +89,15 @@ export default function SalasPage() {
                         <div className="w-20 h-20 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-6">
                             <HomeIcon className="w-10 h-10" />
                         </div>
-                        <h3 className="text-xl font-bold text-slate-800">No tienes salas registradas</h3>
-                        <p className="text-slate-500 mt-2 max-w-sm mx-auto">
+                        <h3>No tienes salas registradas</h3>
+                        <p className="text-description mt-2 max-w-sm mx-auto">
                             Comienza creando tu primera sala para organizar tus camas y dispositivos de control.
                         </p>
                         <button
                             onClick={() => setIsModalOpen(true)}
-                            className="mt-8 px-8 py-3 bg-white border-2 border-slate-200 text-slate-700 font-bold rounded-xl hover:border-sky-500 hover:text-sky-600 transition-all"
+                            className="mt-8 px-8 py-3 bg-indigo-600 text-white font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20"
                         >
-                            Crear mi primera sala
+                            CREAR MI PRIMERA SALA
                         </button>
                     </div>
                 )}

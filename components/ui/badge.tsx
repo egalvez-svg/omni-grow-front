@@ -1,46 +1,41 @@
 import React from 'react'
 
-export type BadgeVariant = 'success' | 'error' | 'warning' | 'info' | 'default' | 'gray'
-export type BadgeSize = 'sm' | 'md' | 'lg'
+export type BadgeVariant = 'default' | 'secondary' | 'outline' | 'destructive' | 'success' | 'warning' | 'info' | 'neon' | 'soft'
 
-interface BadgeProps {
-    children: React.ReactNode
+interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
     variant?: BadgeVariant
-    size?: BadgeSize
-    className?: string
+    children: React.ReactNode
 }
 
 export function Badge({
-    children,
+    className = '',
     variant = 'default',
-    size = 'md',
-    className = ''
+    children,
+    ...props
 }: BadgeProps) {
-    const variantStyles = {
-        success: 'bg-green-100 text-green-800',
-        error: 'bg-red-100 text-red-800',
-        warning: 'bg-yellow-100 text-yellow-800',
-        info: 'bg-blue-100 text-blue-800',
-        default: 'bg-gray-100 text-gray-800',
-        gray: 'bg-gray-100 text-gray-800'
-    }
 
-    const sizeStyles = {
-        sm: 'px-2 py-0.5 text-xs',
-        md: 'px-2 py-1 text-xs',
-        lg: 'px-3 py-1 text-sm'
+    const baseStyles = 'inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2'
+
+    const variants = {
+        default: 'border-transparent bg-indigo-600 text-white shadow hover:bg-indigo-700',
+        secondary: 'border-transparent bg-slate-100 text-slate-900 hover:bg-slate-200',
+        destructive: 'border-transparent bg-rose-500 text-white shadow hover:bg-rose-600',
+        outline: 'text-slate-900 border border-slate-200',
+        success: 'border-transparent bg-emerald-500 text-white shadow hover:bg-emerald-600',
+        warning: 'border-transparent bg-amber-500 text-white shadow hover:bg-amber-600',
+        info: 'border-transparent bg-sky-500 text-white shadow hover:bg-sky-600',
+
+        // New Eco-Tech Variants
+        neon: 'border border-emerald-400/30 bg-emerald-500/10 text-emerald-600 shadow-[0_0_10px_rgba(16,185,129,0.2)] backdrop-blur-sm',
+        soft: 'border-transparent bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
     }
 
     return (
-        <span
-            className={`
-        inline-flex items-center rounded font-medium
-        ${variantStyles[variant]} 
-        ${sizeStyles[size]}
-        ${className}
-      `}
+        <div
+            className={`${baseStyles} ${variants[variant]} ${className}`}
+            {...props}
         >
             {children}
-        </span>
+        </div>
     )
 }

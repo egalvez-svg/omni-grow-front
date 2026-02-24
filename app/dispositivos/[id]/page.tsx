@@ -114,7 +114,7 @@ export default function UserDeviceDetailPage() {
                     <span className="group-hover:text-cyan-700 transition-colors"></span>
                 </button>
 
-                <h1 className="text-2xl font-bold text-slate-800 mb-6">Detalle del Dispositivo</h1>
+                <h2 className="mb-4">Detalle del Dispositivo</h2>
 
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                     <div className="lg:col-span-3 lg:order-1">
@@ -133,24 +133,19 @@ export default function UserDeviceDetailPage() {
                         {/* Sala Info */}
                         {device.sala && (
                             <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-6">
-                                <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                                    <svg className="w-5 h-5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                                    </svg>
-                                    Sala Asignada
-                                </h2>
+                                <h2 className="mb-4">Sala Asignada</h2>
 
                                 <div className="space-y-4">
-                                    <div className="p-4 bg-sky-50 rounded-2xl border border-sky-100">
-                                        <p className="text-sky-900 font-bold mb-1">{device.sala.nombre}</p>
-                                        <p className="text-xs text-sky-600 font-medium line-clamp-2">
+                                    <div className="p-5 bg-indigo-50/50 rounded-3xl border border-indigo-100/50">
+                                        <p className="text-indigo-900 font-black text-lg mb-1 tracking-tight">{device.sala.nombre}</p>
+                                        <p className="text-slate-600 font-medium text-sm leading-relaxed">
                                             {device.sala.descripcion || 'Sin descripción adicional'}
                                         </p>
                                     </div>
 
                                     {device.sala.camas && device.sala.camas.length > 0 && (
-                                        <div className="space-y-2">
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Camas y Cultivos</p>
+                                        <div className="space-y-3">
+                                            <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1 opacity-70">Camas y Cultivos</p>
                                             <div className="grid grid-cols-1 gap-2">
                                                 {device.sala.camas.map(cama => {
                                                     const cultivoActivo = cultivos?.find((c: Cultivo) => c.camaId === cama.id && c.estado !== 'finalizado' && c.estado !== 'cancelado')
@@ -180,16 +175,16 @@ export default function UserDeviceDetailPage() {
 
                                     <button
                                         onClick={() => router.push(`/salas/${device.sala?.id}`)}
-                                        className="w-full py-3 bg-slate-900 text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10"
+                                        className="w-full py-4 bg-slate-900 text-white text-[11px] font-black uppercase tracking-widest rounded-2xl hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20 active:scale-[0.98]"
                                     >
-                                        Ver Panel de Sala
+                                        VER PANEL DE SALA
                                     </button>
                                 </div>
                             </div>
                         )}
 
-                        <div className="mb-4">
-                            <h2 className="text-lg font-semibold text-slate-800">Automatización</h2>
+                        <div className="mb-6">
+                            <h2 className="mb-1">Automatización</h2>
                             <p className="text-sm text-slate-600">Reglas de este dispositivo</p>
                         </div>
                         <RulesList

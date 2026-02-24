@@ -3,8 +3,9 @@ import React from 'react'
 interface CardProps {
     children: React.ReactNode
     className?: string
-    variant?: 'default' | 'bordered' | 'elevated'
+    variant?: 'default' | 'bordered' | 'elevated' | 'glass'
     onClick?: () => void
+    hover?: boolean
 }
 
 interface CardHeaderProps {
@@ -26,21 +27,28 @@ export function Card({
     children,
     className = '',
     variant = 'default',
-    onClick
+    onClick,
+    hover
 }: CardProps) {
     const baseStyles = 'bg-white rounded-lg'
 
     const variantStyles = {
-        default: 'shadow',
-        bordered: 'border border-gray-200',
-        elevated: 'shadow-lg'
+        default: 'bg-white shadow-sm border border-slate-100',
+        bordered: 'bg-white border border-slate-200',
+        elevated: 'bg-white shadow-xl shadow-slate-200/50 border border-slate-100',
+        glass: 'glass-panel'
     }
 
-    const clickableStyles = onClick ? 'cursor-pointer transition-shadow hover:shadow-lg' : ''
+    const hoverStyles = (onClick || hover) ? 'hover-card cursor-pointer' : ''
 
     return (
         <div
-            className={`${baseStyles} ${variantStyles[variant]} ${clickableStyles} ${className}`}
+            className={`
+                ${baseStyles}
+                ${variantStyles[variant]}
+                ${hoverStyles}
+                ${className}
+            `}
             onClick={onClick}
         >
             {children}

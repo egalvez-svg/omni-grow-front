@@ -8,8 +8,9 @@ import { fetchMediosCultivo } from '@/lib/api/medio-cultivo-service'
 import { fetchUserSalas } from '@/lib/api/salas-service'
 import { fetchCamasBySala } from '@/lib/api/camas-service'
 import { CreateCultivoDto, CropStatus, Cultivo, Fase } from '@/lib/types/api'
-import { Plus, Sprout, Home, Layers, Dna, Calendar, Activity, Hash, AlertCircle, Save, Droplets } from 'lucide-react'
+import { Plus, Sprout, Home, Layers, Dna, Calendar, Activity, Hash, AlertCircle, Check, Droplets } from 'lucide-react'
 import { ErrorMessage } from '@/components/ui/error-message'
+import { Select } from '@/components/ui'
 import { useToast } from '@/providers/toast-provider'
 import { cn } from '@/lib/utils'
 
@@ -39,13 +40,13 @@ export function CreateCultivoForm({ initialData, onSuccess, onCancel }: CreateCu
         return {
             nombre: initialData?.nombre || '',
             fecha_inicio: initialData?.fecha_inicio ? initialData.fecha_inicio.split('T')[0] : new Date().toISOString().split('T')[0],
-            estado: (initialData?.estado?.toLowerCase() as CropStatus) || 'vegetativo',
             faseId: initialData?.faseActual?.id || 0,
             variedadIds,
             salaId: initialData?.salaId || initialData?.sala?.id || 0,
             camaId: initialData?.camaId || initialData?.cama?.id || 0,
-            cantidad_plantas: initialData?.cantidad_plantas || 0,
-            medioCultivoId: initialData?.medioCultivoId || 0
+            cantidad_plantas: initialData?.cantidad_plantas || 1,
+            medioCultivoId: initialData?.medioCultivoId || 0,
+            notas: ''
         }
     })
 
@@ -76,7 +77,7 @@ export function CreateCultivoForm({ initialData, onSuccess, onCancel }: CreateCu
     })
 
     const selectedCama = camas?.find(c => c.id === formData.camaId)
-    const capacityExceeded = selectedCama && (selectedCama.capacidad_plantas || 0) > 0 && formData.cantidad_plantas > (selectedCama.capacidad_plantas || 0)
+    const capacityExceeded = selectedCama && (selectedCama.capacidad_plantas || 0) > 0 && (formData.cantidad_plantas || 0) > (selectedCama.capacidad_plantas || 0)
 
     const mutation = useMutation({
         mutationFn: (data: CreateCultivoDto) =>
@@ -186,63 +187,48 @@ export function CreateCultivoForm({ initialData, onSuccess, onCancel }: CreateCu
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Sala */}
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                            <Home className="w-4 h-4 text-sky-500" />
-                            Sala
-                        </label>
-                        <select
-                            required
-                            value={formData.salaId}
-                            onChange={(e) => setFormData({ ...formData, salaId: parseInt(e.target.value), camaId: 0 })}
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium text-slate-900"
-                        >
-                            <option value="">Selecciona sala</option>
-                            {salas?.map(s => (
-                                <option key={s.id} value={s.id}>{s.nombre}</option>
-                            ))}
-                        </select>
-                    </div>
+                    <Select
+                        label="Sala"
+                        required
+                        icon={<Home className="w-4 h-4" />}
+                        value={formData.salaId}
+                        onChange={(e) => setFormData({ ...formData, salaId: parseInt(e.target.value), camaId: 0 })}
+                    >
+                        <option value="">Selecciona sala</option>
+                        {salas?.map(s => (
+                            <option key={s.id} value={s.id}>{s.nombre}</option>
+                        ))}
+                    </Select>
 
                     {/* Cama */}
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                            <Layers className="w-4 h-4 text-sky-500" />
-                            Cama
-                        </label>
-                        <select
-                            required
-                            value={formData.camaId}
-                            onChange={(e) => setFormData({ ...formData, camaId: parseInt(e.target.value) })}
-                            disabled={!formData.salaId}
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium disabled:opacity-50 text-slate-900"
-                        >
-                            <option value="">Selecciona cama</option>
-                            {camas?.map(c => (
-                                <option key={c.id} value={c.id}>{c.nombre} {c.capacidad_plantas ? `(${c.capacidad_plantas} plantas máx)` : ''}</option>
-                            ))}
-                        </select>
-                    </div>
+                    <Select
+                        label="Cama"
+                        required
+                        icon={<Layers className="w-4 h-4" />}
+                        value={formData.camaId}
+                        onChange={(e) => setFormData({ ...formData, camaId: parseInt(e.target.value) })}
+                        disabled={!formData.salaId}
+                    >
+                        <option value="">Selecciona cama</option>
+                        {camas?.map(c => (
+                            <option key={c.id} value={c.id}>{c.nombre} {c.capacidad_plantas ? `(${c.capacidad_plantas} plantas máx)` : ''}</option>
+                        ))}
+                    </Select>
                 </div>
 
                 {/* Medio de Cultivo */}
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                        <Droplets className="w-4 h-4 text-sky-500" />
-                        Medio de Cultivo
-                    </label>
-                    <select
-                        required
-                        value={formData.medioCultivoId}
-                        onChange={(e) => setFormData({ ...formData, medioCultivoId: parseInt(e.target.value) })}
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium text-slate-900"
-                    >
-                        <option value="">Selecciona medio de cultivo</option>
-                        {medios?.map(m => (
-                            <option key={m.id} value={m.id}>{m.nombre}</option>
-                        ))}
-                    </select>
-                </div>
+                <Select
+                    label="Medio de Cultivo"
+                    required
+                    icon={<Droplets className="w-4 h-4" />}
+                    value={formData.medioCultivoId}
+                    onChange={(e) => setFormData({ ...formData, medioCultivoId: parseInt(e.target.value) })}
+                >
+                    <option value="">Selecciona medio de cultivo</option>
+                    {medios?.map(m => (
+                        <option key={m.id} value={m.id}>{m.nombre}</option>
+                    ))}
+                </Select>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Cantidad de Plantas */}
@@ -298,22 +284,31 @@ export function CreateCultivoForm({ initialData, onSuccess, onCancel }: CreateCu
                 </div>
 
                 {/* Fase Inicial */}
+                <Select
+                    label="Etapa Inicial"
+                    required
+                    icon={<Activity className="w-4 h-4" />}
+                    value={formData.faseId}
+                    onChange={(e) => setFormData({ ...formData, faseId: parseInt(e.target.value) })}
+                >
+                    <option value="">Seleccionar etapa inicial</option>
+                    {fases?.map(f => (
+                        <option key={f.id} value={f.id}>{f.nombre}</option>
+                    ))}
+                </Select>
+                {/* Notas */}
                 <div className="space-y-2">
                     <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                        <Activity className="w-4 h-4 text-sky-500" />
-                        Etapa Inicial
+                        <AlertCircle className="w-4 h-4 text-sky-500" />
+                        Notas Iniciales
+                        <span className="text-xs font-normal text-slate-400">(opcional)</span>
                     </label>
-                    <select
-                        required
-                        value={formData.faseId}
-                        onChange={(e) => setFormData({ ...formData, faseId: parseInt(e.target.value) })}
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium text-slate-900"
-                    >
-                        <option value="">Seleccionar etapa inicial</option>
-                        {fases?.map(f => (
-                            <option key={f.id} value={f.id}>{f.nombre}</option>
-                        ))}
-                    </select>
+                    <textarea
+                        value={formData.notas || ''}
+                        onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
+                        placeholder="Ej: Observaciones sobre la salud inicial, condiciones de transporte, etc."
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium text-slate-900 min-h-[100px] resize-none"
+                    />
                 </div>
             </div>
 
@@ -330,22 +325,22 @@ export function CreateCultivoForm({ initialData, onSuccess, onCancel }: CreateCu
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="flex-1 px-6 py-3 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-all"
+                    className="flex-1 px-6 py-3 border border-slate-200 text-slate-600 font-black uppercase tracking-widest text-[11px] rounded-xl hover:bg-slate-50 transition-all"
                 >
-                    Cancelar
+                    CANCELAR
                 </button>
                 <button
                     type="submit"
                     disabled={mutation.isPending || capacityExceeded}
                     className={cn(
-                        "flex-1 px-6 py-3 text-white font-bold rounded-xl transition-all shadow-lg disabled:opacity-50 flex items-center justify-center gap-2",
-                        isEdit ? "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20" : "bg-sky-600 hover:bg-sky-700 shadow-sky-600/20"
+                        "flex-1 px-6 py-3 text-white font-black uppercase tracking-widest text-[11px] rounded-xl transition-all shadow-lg disabled:opacity-50 flex items-center justify-center gap-2",
+                        "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20"
                     )}
                 >
                     {mutation.isPending
-                        ? (isEdit ? 'Guardando...' : 'Iniciando...')
-                        : (isEdit ? 'Guardar' : 'Empezar Cultivo')}
-                    {!mutation.isPending && (isEdit ? <Save className="w-5 h-5" /> : <Plus className="w-5 h-5" />)}
+                        ? 'PROCESANDO'
+                        : (isEdit ? 'ACTUALIZAR' : 'GUARDAR')}
+                    {!mutation.isPending && (isEdit ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />)}
                 </button>
             </div>
         </form>

@@ -2,7 +2,7 @@ import axios, { AxiosError } from 'axios'
 import { getStoredAccessToken, getStoredRefreshToken, setStoredAccessToken, logoutUser } from '@/lib/auth/auth-service'
 
 const apiClient = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://192.168.100.36:3069',
+    baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://192.168.100.37:3069',
     headers: {
         'Content-Type': 'application/json',
     },

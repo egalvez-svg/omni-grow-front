@@ -21,6 +21,13 @@ export const metadata: Metadata = {
   description: "Sistema de control y monitoreo de clima inteligente",
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 0.70,
+  maximumScale: 2.0,
+  userScalable: true,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{

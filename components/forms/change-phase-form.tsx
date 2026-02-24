@@ -8,8 +8,9 @@ import { fetchUserSalas } from '@/lib/api/salas-service'
 import { fetchCamasBySala } from '@/lib/api/camas-service'
 import { fetchMediosCultivo } from '@/lib/api/medio-cultivo-service'
 import { CreateTransicionFaseDto, Fase, Cultivo } from '@/lib/types/api'
-import { Activity, Save, AlertCircle, FileText, MapPin, Layers, Droplets } from 'lucide-react'
+import { Activity, Check, AlertCircle, FileText, MapPin, Layers, Droplets } from 'lucide-react'
 import { ErrorMessage } from '@/components/ui/error-message'
+import { Select } from '@/components/ui'
 import { useToast } from '@/providers/toast-provider'
 
 interface ChangePhaseFormProps {
@@ -86,29 +87,26 @@ export function ChangePhaseForm({ cultivo, onSuccess, onCancel }: ChangePhaseFor
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="p-4 bg-amber-50 rounded-2xl flex items-start gap-3 border border-amber-100 mb-2">
-                <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5" />
-                <div>
-                    <p className="text-sm font-bold text-amber-800">Transición de Etapa</p>
-                    <p className="text-xs text-amber-600">
-                        Cambiar la etapa registrará este momento en el historial del ciclo. Asegúrate de que las condiciones ambientales sean las adecuadas para la nueva etapa.
+        <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="p-3 bg-amber-50 rounded-xl flex items-start gap-2.5 border border-amber-100 mb-1">
+                <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+                <div className="min-w-0">
+                    <p className="text-[11px] font-black text-amber-800 leading-tight">Transición de Etapa</p>
+                    <p className="text-[10px] text-amber-600 leading-normal mt-0.5">
+                        Registra este momento en el historial. Asegúrate de ajustar las condiciones ambientales.
                     </p>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 gap-3">
                 {/* Nueva Etapa */}
-                <div className="space-y-2 md:col-span-2">
-                    <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                        <Activity className="w-4 h-4 text-emerald-500" />
-                        Nueva Etapa <span className="text-rose-500">*</span>
-                    </label>
-                    <select
+                <div className="col-span-2">
+                    <Select
+                        label="Nueva Etapa"
                         required
+                        icon={<Activity className="w-3.5 h-3.5" />}
                         value={formData.nuevaFaseId}
                         onChange={(e) => setFormData({ ...formData, nuevaFaseId: parseInt(e.target.value) })}
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium text-slate-900"
                     >
                         <option value={0}>Seleccionar nueva etapa...</option>
                         {fases?.map(f => (
@@ -120,75 +118,62 @@ export function ChangePhaseForm({ cultivo, onSuccess, onCancel }: ChangePhaseFor
                                 {f.nombre} {f.id === cultivo.faseActual?.id ? '(Actual)' : ''}
                             </option>
                         ))}
-                    </select>
+                    </Select>
                 </div>
 
                 {/* Sala */}
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-sky-500" />
-                        Sala (Opcional)
-                    </label>
-                    <select
-                        value={formData.salaId || ''}
-                        onChange={(e) => setFormData({ ...formData, salaId: e.target.value ? parseInt(e.target.value) : undefined })}
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium text-slate-900"
-                    >
-                        <option value="">Seleccionar sala...</option>
-                        {salas?.map(s => (
-                            <option key={s.id} value={s.id}>{s.nombre}</option>
-                        ))}
-                    </select>
-                </div>
+                <Select
+                    label="Sala"
+                    icon={<MapPin className="w-3.5 h-3.5" />}
+                    value={formData.salaId || ''}
+                    onChange={(e) => setFormData({ ...formData, salaId: e.target.value ? parseInt(e.target.value) : undefined })}
+                >
+                    <option value="">Opcional</option>
+                    {salas?.map(s => (
+                        <option key={s.id} value={s.id}>{s.nombre}</option>
+                    ))}
+                </Select>
 
                 {/* Cama */}
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                        <Layers className="w-4 h-4 text-sky-500" />
-                        Cama (Opcional)
-                    </label>
-                    <select
-                        value={formData.camaId || ''}
-                        disabled={!formData.salaId || loadingCamas}
-                        onChange={(e) => setFormData({ ...formData, camaId: e.target.value ? parseInt(e.target.value) : undefined })}
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium text-slate-900 disabled:opacity-50"
-                    >
-                        <option value="">{loadingCamas ? 'Cargando camas...' : 'Seleccionar cama...'}</option>
-                        {camas?.map(c => (
-                            <option key={c.id} value={c.id}>{c.nombre} (Cap: {c.capacidad_plantas})</option>
-                        ))}
-                    </select>
-                </div>
+                <Select
+                    label="Cama"
+                    icon={<Layers className="w-3.5 h-3.5" />}
+                    value={formData.camaId || ''}
+                    disabled={!formData.salaId || loadingCamas}
+                    onChange={(e) => setFormData({ ...formData, camaId: e.target.value ? parseInt(e.target.value) : undefined })}
+                >
+                    <option value="">{loadingCamas ? '...' : 'Opcional'}</option>
+                    {camas?.map(c => (
+                        <option key={c.id} value={c.id}>{c.nombre}</option>
+                    ))}
+                </Select>
 
                 {/* Medio de Cultivo */}
-                <div className="space-y-2 md:col-span-2">
-                    <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                        <Droplets className="w-4 h-4 text-emerald-500" />
-                        Medio de Cultivo (Opcional)
-                    </label>
-                    <select
+                <div className="col-span-2">
+                    <Select
+                        label="Medio de Cultivo"
+                        icon={<Droplets className="w-3.5 h-3.5" />}
                         value={formData.medioCultivoId || ''}
                         onChange={(e) => setFormData({ ...formData, medioCultivoId: e.target.value ? parseInt(e.target.value) : undefined })}
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium text-slate-900"
                     >
-                        <option value="">Seleccionar medio...</option>
+                        <option value="">Opcional</option>
                         {medios?.map(m => (
                             <option key={m.id} value={m.id}>{m.nombre}</option>
                         ))}
-                    </select>
+                    </Select>
                 </div>
 
                 {/* Notas */}
-                <div className="space-y-2 md:col-span-2">
-                    <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-emerald-500" />
-                        Notas de la Transición (Opcional)
+                <div className="col-span-2 space-y-1.5">
+                    <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                        <FileText className="w-3.5 h-3.5 text-emerald-500" />
+                        Notas (Opcional)
                     </label>
                     <textarea
                         value={formData.notas}
                         onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
-                        placeholder="Ej: Se observa buen vigor, iniciando ciclo de luz 12/12..."
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium min-h-[100px] text-slate-900"
+                        placeholder="Observaciones de la transición..."
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-bold text-sm min-h-[60px] text-slate-900"
                     />
                 </div>
             </div>
@@ -202,21 +187,21 @@ export function ChangePhaseForm({ cultivo, onSuccess, onCancel }: ChangePhaseFor
                 </div>
             )}
 
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row gap-2 pt-1">
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="flex-1 px-6 py-3 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-all"
+                    className="flex-1 px-6 py-3 border border-slate-200 text-slate-500 font-bold rounded-xl hover:bg-slate-50 transition-all text-xs uppercase tracking-widest"
                 >
-                    Cancelar
+                    CANCELAR
                 </button>
                 <button
                     type="submit"
                     disabled={mutation.isPending || formData.nuevaFaseId === 0}
-                    className="flex-[2] px-6 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="flex-[2] px-6 py-3 bg-indigo-600 text-white font-black rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 disabled:opacity-50 flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
                 >
-                    {mutation.isPending ? 'Procesando...' : 'Confirmar Cambio de Etapa'}
-                    {!mutation.isPending && <Save className="w-5 h-5" />}
+                    {mutation.isPending ? 'PROCESANDO' : 'GUARDAR'}
+                    {!mutation.isPending && <Check className="w-4 h-4 text-emerald-400" />}
                 </button>
             </div>
         </form>

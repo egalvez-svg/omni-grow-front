@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import type { Regla, Sensor, Actuador } from '@/lib/types/api'
+import { Select } from '@/components/ui'
+import { Activity, Thermometer, Zap, Play, Square, RefreshCcw, Clock } from 'lucide-react'
 
 interface RuleFormProps {
     deviceId: number
@@ -124,63 +126,51 @@ export function RuleForm({ deviceId, sensors, actuators, onSubmit, onCancel, ini
                 </div>
             </div>
 
-            <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Actuador
-                </label>
-                <select
-                    value={actuadorId}
-                    onChange={(e) => setActuadorId(e.target.value)}
-                    className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
-                    required
-                >
-                    <option value="">Seleccionar actuador</option>
-                    {actuators.map((actuador) => (
-                        <option key={actuador.id} value={actuador.id}>
-                            {actuador.tipo}
-                        </option>
-                    ))}
-                </select>
-            </div>
+            <Select
+                label="Actuador"
+                required
+                icon={<Zap className="w-4 h-4" />}
+                value={actuadorId}
+                onChange={(e) => setActuadorId(e.target.value)}
+            >
+                <option value="">Seleccionar actuador</option>
+                {actuators.map((actuador) => (
+                    <option key={actuador.id} value={actuador.id}>
+                        {actuador.tipo}
+                    </option>
+                ))}
+            </Select>
 
             {tipo === 'sensor' ? (
                 <>
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                            Sensor
-                        </label>
-                        <select
-                            value={sensorId}
-                            onChange={(e) => setSensorId(e.target.value)}
-                            className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
-                            required
-                        >
-                            <option value="">Seleccionar sensor</option>
-                            {sensors.map((sensor) => (
-                                <option key={sensor.id} value={sensor.id}>
-                                    {sensor.tipo} ({sensor.unidad})
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    <Select
+                        label="Sensor"
+                        required
+                        icon={<Thermometer className="w-4 h-4" />}
+                        value={sensorId}
+                        onChange={(e) => setSensorId(e.target.value)}
+                    >
+                        <option value="">Seleccionar sensor</option>
+                        {sensors.map((sensor) => (
+                            <option key={sensor.id} value={sensor.id}>
+                                {sensor.tipo} ({sensor.unidad})
+                            </option>
+                        ))}
+                    </Select>
 
                     <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                Comparador
-                            </label>
-                            <select
-                                value={comparador}
-                                onChange={(e) => setComparador(e.target.value as any)}
-                                className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
-                            >
-                                <option value=">">Mayor que (&gt;)</option>
-                                <option value="<">Menor que (&lt;)</option>
-                                <option value=">=">Mayor o igual (≥)</option>
-                                <option value="<=">Menor o igual (≤)</option>
-                                <option value="=">Igual (=)</option>
-                            </select>
-                        </div>
+                        <Select
+                            label="Comparador"
+                            icon={<Activity className="w-4 h-4" />}
+                            value={comparador}
+                            onChange={(e) => setComparador(e.target.value as any)}
+                        >
+                            <option value=">">Mayor que (&gt;)</option>
+                            <option value="<">Menor que (&lt;)</option>
+                            <option value=">=">Mayor o igual (≥)</option>
+                            <option value="<=">Menor o igual (≤)</option>
+                            <option value="=">Igual (=)</option>
+                        </Select>
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-2">
                                 Valor
@@ -198,20 +188,16 @@ export function RuleForm({ deviceId, sensors, actuators, onSubmit, onCancel, ini
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                Acción
-                            </label>
-                            <select
-                                value={accion}
-                                onChange={(e) => setAccion(e.target.value as any)}
-                                className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
-                            >
-                                <option value="encender">Encender</option>
-                                <option value="apagar">Apagar</option>
-                                <option value="toggle">Alternar</option>
-                            </select>
-                        </div>
+                        <Select
+                            label="Acción"
+                            icon={<Play className="w-4 h-4" />}
+                            value={accion}
+                            onChange={(e) => setAccion(e.target.value as any)}
+                        >
+                            <option value="encender">Encender</option>
+                            <option value="apagar">Apagar</option>
+                            <option value="toggle">Alternar</option>
+                        </Select>
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-2">
                                 Delay (segundos)
@@ -242,19 +228,15 @@ export function RuleForm({ deviceId, sensors, actuators, onSubmit, onCancel, ini
                                 required
                             />
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                Acción Inicio
-                            </label>
-                            <select
-                                value={accion_inicio}
-                                onChange={(e) => setaccion_inicio(e.target.value as any)}
-                                className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
-                            >
-                                <option value="encender">Encender</option>
-                                <option value="apagar">Apagar</option>
-                            </select>
-                        </div>
+                        <Select
+                            label="Acción Inicio"
+                            icon={<Play className="w-4 h-4" />}
+                            value={accion_inicio}
+                            onChange={(e) => setaccion_inicio(e.target.value as any)}
+                        >
+                            <option value="encender">Encender</option>
+                            <option value="apagar">Apagar</option>
+                        </Select>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
@@ -270,19 +252,15 @@ export function RuleForm({ deviceId, sensors, actuators, onSubmit, onCancel, ini
                                 required
                             />
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                Acción Fin
-                            </label>
-                            <select
-                                value={accion_fin}
-                                onChange={(e) => setaccion_fin(e.target.value as any)}
-                                className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
-                            >
-                                <option value="encender">Encender</option>
-                                <option value="apagar">Apagar</option>
-                            </select>
-                        </div>
+                        <Select
+                            label="Acción Fin"
+                            icon={<Square className="w-4 h-4" />}
+                            value={accion_fin}
+                            onChange={(e) => setaccion_fin(e.target.value as any)}
+                        >
+                            <option value="encender">Encender</option>
+                            <option value="apagar">Apagar</option>
+                        </Select>
                     </div>
 
                     <div>
