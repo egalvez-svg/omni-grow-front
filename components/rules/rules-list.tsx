@@ -91,8 +91,8 @@ export function RulesList({ deviceId, sensors, actuators }: RulesListProps) {
 
     return (
         <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-slate-800">Reglas de Automatización</h3>
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-slate-800">Reglas de Automatización</h3>
                 {!showForm && (
                     <button
                         onClick={() => setShowForm(true)}

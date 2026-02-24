@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { LoadingSpinner, ErrorMessage } from '@/components/ui'
+import { ArrowLeft, ChevronRight } from 'lucide-react'
 import { DeviceCard, WeatherWidget } from '@/components/dashboard'
 import { fetchUsers } from '@/lib/api/users-service'
 import { fetchUserDevices, ejecutarAccionActuador } from '@/lib/api/devices-service'
@@ -49,8 +50,8 @@ export default function AdminDashboardPage() {
             <main className="flex-1 overflow-y-auto p-8 bg-gradient-to-br from-sky-50 via-cyan-25 to-blue-50">
                 <div className="max-w-7xl mx-auto">
                     <div className="mb-8">
-                        <h2 className="text-3xl font-semibold text-slate-800">Dashboard de Administrador</h2>
-                        <p className="text-slate-600 mt-1.5">
+                        <h2>Dashboard de Administrador</h2>
+                        <p className="text-description mt-1.5">
                             Selecciona un usuario para ver su dashboard
                         </p>
                     </div>
@@ -102,9 +103,11 @@ export default function AdminDashboardPage() {
                                                 )}
                                             </div>
                                         </div>
-                                        <svg className="w-5 h-5 text-slate-400 group-hover:text-cyan-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                        </svg>
+                                    </div>
+
+                                    <div className="mt-6 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-50 text-slate-600 font-black uppercase tracking-widest text-[9px] group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
+                                        VER DASHBOARD
+                                        <ChevronRight className="w-3.5 h-3.5" />
                                     </div>
                                 </button>
                             ))}
@@ -133,27 +136,25 @@ export default function AdminDashboardPage() {
                 {/* Back Button */}
                 <button
                     onClick={() => setSelectedUser(null)}
-                    className="mb-6 inline-flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl shadow-sm border border-slate-200 hover:shadow-md hover:border-cyan-300 transition-all duration-200 text-slate-700 font-medium group"
+                    className="mb-6 inline-flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl shadow-sm border border-slate-200 hover:shadow-md hover:border-indigo-300 transition-all duration-200 text-slate-700 font-black uppercase tracking-widest text-[10px] group"
                 >
-                    <svg className="w-5 h-5 text-slate-400 group-hover:text-cyan-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                    <span className="group-hover:text-cyan-700 transition-colors">Volver a selección de usuarios</span>
+                    <ArrowLeft className="w-5 h-5 text-slate-400 group-hover:text-indigo-600 transition-colors" />
+                    <span className="group-hover:text-indigo-700 transition-colors">Volver a selección</span>
                 </button>
 
                 {/* User Info Header */}
                 <div className="mb-10">
                     <div className="flex items-center gap-4 mb-4">
-                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
                             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                         </div>
                         <div>
-                            <h2 className="text-3xl font-semibold text-slate-800">
-                                Dashboard de {selectedUser.nombre} {selectedUser.apellido_paterno}
+                            <h2>
+                                Dashboard de {selectedUser.nombre}
                             </h2>
-                            <p className="text-slate-600 mt-1">
+                            <p className="text-description mt-1">
                                 {selectedUser.email} • @{selectedUser.usuario}
                             </p>
                         </div>
@@ -185,15 +186,15 @@ export default function AdminDashboardPage() {
                 ) : (
                     <div className="text-center py-16">
                         <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white shadow-sm mb-6">
-                            <svg className="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-10 h-10 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                             </svg>
                         </div>
-                        <h3 className="text-xl font-semibold text-slate-700 mb-2">
-                            Este usuario no tiene dispositivos
+                        <h3>
+                            Sin dispositivos asignados
                         </h3>
-                        <p className="text-slate-500 max-w-md mx-auto">
-                            Asigna dispositivos a este usuario desde la sección de dispositivos.
+                        <p className="text-description max-w-sm mx-auto">
+                            Asigna dispositivos a este usuario desde la sección de configuración.
                         </p>
                     </div>
                 )}

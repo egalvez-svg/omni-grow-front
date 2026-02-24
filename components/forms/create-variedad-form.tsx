@@ -4,8 +4,9 @@ import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createVariedad, updateVariedad } from '@/lib/api/catalogos-service'
 import { CreateVariedadDto, Variedad } from '@/lib/types/api'
-import { Plus, Dna, AlignLeft, Bookmark, Tag, Save } from 'lucide-react'
+import { Plus, Dna, AlignLeft, Bookmark, Tag, Check } from 'lucide-react'
 import { ErrorMessage } from '@/components/ui/error-message'
+import { Select } from '@/components/ui'
 import { useToast } from '@/providers/toast-provider'
 
 interface CreateVariedadFormProps {
@@ -93,22 +94,17 @@ export function CreateVariedadForm({ onSuccess, onCancel, initialData }: CreateV
                     </div>
 
                     {/* Tipo Genético */}
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                            <Tag className="w-4 h-4 text-indigo-500" />
-                            Tipo Genético
-                        </label>
-                        <select
-                            value={formData.tipo}
-                            onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-slate-900"
-                        >
-                            <option value="sativa">Sativa</option>
-                            <option value="indica">Indica</option>
-                            <option value="hibrida">Híbrida</option>
-                            <option value="rudelaris">Rudelaris</option>
-                        </select>
-                    </div>
+                    <Select
+                        label="Tipo Genético"
+                        icon={<Tag className="w-4 h-4" />}
+                        value={formData.tipo}
+                        onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
+                    >
+                        <option value="sativa">Sativa</option>
+                        <option value="indica">Indica</option>
+                        <option value="hibrida">Híbrida</option>
+                        <option value="rudelaris">Rudelaris</option>
+                    </Select>
                 </div>
 
                 {/* Descripción */}
@@ -139,17 +135,17 @@ export function CreateVariedadForm({ onSuccess, onCancel, initialData }: CreateV
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="flex-1 px-6 py-3 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-all"
+                    className="flex-1 px-6 py-3 border border-slate-200 text-slate-600 font-black uppercase tracking-widest text-[11px] rounded-xl hover:bg-slate-50 transition-all"
                 >
-                    Cancelar
+                    CANCELAR
                 </button>
                 <button
                     type="submit"
                     disabled={mutation.isPending}
-                    className="flex-1 px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="flex-1 px-6 py-3 bg-indigo-600 text-white font-black uppercase tracking-widest text-[11px] rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                    {mutation.isPending ? 'Guardando...' : initialData ? 'Actualizar Variedad' : 'Guardar Variedad'}
-                    {!mutation.isPending && (initialData ? <Save className="w-5 h-5" /> : <Plus className="w-5 h-5" />)}
+                    {mutation.isPending ? 'PROCESANDO' : (initialData ? 'ACTUALIZAR' : 'GUARDAR')}
+                    {!mutation.isPending && (initialData ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />)}
                 </button>
             </div>
         </form>

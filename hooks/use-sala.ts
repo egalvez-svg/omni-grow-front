@@ -11,7 +11,7 @@ export function useSala(salaId: number) {
     })
 
     const { data: camas, isLoading: camasLoading } = useQuery({
-        queryKey: ['camas-sala', salaId],
+        queryKey: ['camas', salaId],
         queryFn: () => fetchCamasBySala(salaId),
         enabled: !!salaId
     })

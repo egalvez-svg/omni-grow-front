@@ -5,7 +5,7 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { createSala, updateSala } from '@/lib/api/salas-service'
 import { fetchUserDevices } from '@/lib/api/devices-service'
 import { CreateSalaDto, Sala, Dispositivo } from '@/lib/types/api'
-import { Plus, Home, AlignLeft, Save, Cpu, CheckCircle2, Circle } from 'lucide-react'
+import { Plus, Home, AlignLeft, Check, Cpu, CheckCircle2, Circle } from 'lucide-react'
 import { ErrorMessage } from '@/components/ui/error-message'
 import { useToast } from '@/providers/toast-provider'
 import { useAuthContext } from '@/lib/auth/auth-context'
@@ -95,10 +95,10 @@ export function CreateSalaForm({ initialData, onSuccess, onCancel }: CreateSalaF
                                 value={formData.nombre}
                                 onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
                                 placeholder="Ej: Indoor A, Pieza 1, Galpón Central..."
-                                className="w-full px-4 py-3 bg-white border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-bold text-slate-800"
+                                className="w-full px-4 py-3 bg-white border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-bold text-slate-800"
                             />
-                            <p className="text-[10px] text-slate-400 font-medium px-1">
-                                El nombre identificará este espacio físico (Indoor, Pieza, Invernadero, etc.)
+                            <p className="text-[10px] text-description px-1">
+                                El nombre identificará este espacio físico (Indoor, Pieza, Galpón Central, etc.)
                             </p>
                         </div>
 
@@ -111,7 +111,7 @@ export function CreateSalaForm({ initialData, onSuccess, onCancel }: CreateSalaF
                                 value={formData.descripcion}
                                 onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
                                 placeholder="Detalles sobre las dimensiones, ubicación o propósito..."
-                                className="w-full px-4 py-3 bg-white border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium min-h-[120px] text-slate-900"
+                                className="w-full px-4 py-3 bg-white border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium min-h-[120px] text-slate-900"
                             />
                         </div>
                     </div>
@@ -127,7 +127,7 @@ export function CreateSalaForm({ initialData, onSuccess, onCancel }: CreateSalaF
                     <div className="bg-slate-50 p-6 rounded-[2.5rem] border border-slate-100 min-h-[300px]">
                         {devicesLoading ? (
                             <div className="flex items-center justify-center h-full py-12">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500"></div>
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
                             </div>
                         ) : userDevices.length === 0 ? (
                             <div className="text-center py-12 px-4">
@@ -147,14 +147,14 @@ export function CreateSalaForm({ initialData, onSuccess, onCancel }: CreateSalaF
                                             className={cn(
                                                 "flex items-center justify-between p-4 rounded-2xl border-2 transition-all text-left group",
                                                 isSelected
-                                                    ? "bg-white border-sky-500 shadow-md shadow-sky-500/5"
-                                                    : "bg-white/50 border-white hover:border-sky-200"
+                                                    ? "bg-white border-indigo-500 shadow-md shadow-indigo-500/5"
+                                                    : "bg-white/50 border-white hover:border-indigo-200"
                                             )}
                                         >
                                             <div className="flex items-center gap-4">
                                                 <div className={cn(
                                                     "w-10 h-10 rounded-xl flex items-center justify-center transition-colors",
-                                                    isSelected ? "bg-sky-500 text-white" : "bg-slate-100 text-slate-400 group-hover:bg-sky-50 group-hover:text-sky-400"
+                                                    isSelected ? "bg-indigo-500 text-white" : "bg-slate-100 text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-400"
                                                 )}>
                                                     <Cpu className="w-5 h-5" />
                                                 </div>
@@ -168,9 +168,9 @@ export function CreateSalaForm({ initialData, onSuccess, onCancel }: CreateSalaF
                                                 </div>
                                             </div>
                                             {isSelected ? (
-                                                <CheckCircle2 className="w-5 h-5 text-sky-500" />
+                                                <CheckCircle2 className="w-5 h-5 text-indigo-500" />
                                             ) : (
-                                                <Circle className="w-5 h-5 text-slate-200 group-hover:text-sky-200" />
+                                                <Circle className="w-5 h-5 text-slate-200 group-hover:text-indigo-200" />
                                             )}
                                         </button>
                                     )
@@ -196,20 +196,17 @@ export function CreateSalaForm({ initialData, onSuccess, onCancel }: CreateSalaF
                     onClick={onCancel}
                     className="flex-1 px-8 py-4 border border-slate-200 text-slate-400 font-black uppercase tracking-widest text-[10px] rounded-2xl hover:bg-slate-50 transition-all active:scale-[0.98]"
                 >
-                    Cancelar
+                    CANCELAR
                 </button>
                 <button
                     type="submit"
                     disabled={mutation.isPending}
-                    className={cn(
-                        "flex-[2] px-8 py-4 text-white font-black uppercase tracking-widest text-[10px] rounded-2xl transition-all shadow-xl disabled:opacity-50 flex items-center justify-center gap-3 active:scale-[0.98]",
-                        isEdit ? "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20" : "bg-slate-900 hover:bg-slate-800 shadow-slate-900/10"
-                    )}
+                    className="flex-[2] px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-widest text-[10px] rounded-2xl transition-all shadow-xl shadow-indigo-600/20 disabled:opacity-50 flex items-center justify-center gap-3 active:scale-[0.98]"
                 >
                     {mutation.isPending
-                        ? (isEdit ? 'Procesando...' : 'Creando...')
-                        : (isEdit ? 'Guardar Cambios' : 'Crear Espacio')}
-                    {!mutation.isPending && (isEdit ? <Save className="w-5 h-5" /> : <Plus className="w-5 h-5" />)}
+                        ? 'PROCESANDO'
+                        : (isEdit ? 'ACTUALIZAR' : 'GUARDAR')}
+                    {!mutation.isPending && (isEdit ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />)}
                 </button>
             </div>
         </form>

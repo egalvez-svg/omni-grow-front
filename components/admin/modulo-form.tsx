@@ -11,7 +11,7 @@ const moduloSchema = z.object({
     nombre: z.string().min(3, 'El nombre debe tener al menos 3 caracteres').max(50),
     slug: z.string().min(3, 'El slug debe tener al menos 3 caracteres').max(50),
     descripcion: z.string().optional(),
-    activo: z.boolean().default(true),
+    activo: z.boolean(),
 })
 
 type ModuloFormValues = z.infer<typeof moduloSchema>
@@ -80,8 +80,8 @@ export function ModuloForm({ modulo, onSubmit, onCancel, isLoading }: ModuloForm
                         type="text"
                         placeholder="Ej: Control de Clima"
                         className={`w-full px-5 py-4 bg-slate-50 border-2 rounded-2xl focus:ring-4 transition-all outline-none ${errors.nombre
-                                ? 'border-red-100 focus:border-red-500 focus:ring-red-500/10 text-red-900 placeholder:text-red-200'
-                                : 'border-slate-100 focus:border-cyan-500 focus:ring-cyan-500/10 text-slate-700'
+                            ? 'border-red-100 focus:border-red-500 focus:ring-red-500/10 text-red-900 placeholder:text-red-200'
+                            : 'border-slate-100 focus:border-cyan-500 focus:ring-cyan-500/10 text-slate-700'
                             }`}
                     />
                     {errors.nombre && (
@@ -101,8 +101,8 @@ export function ModuloForm({ modulo, onSubmit, onCancel, isLoading }: ModuloForm
                         type="text"
                         placeholder="ej-control-clima"
                         className={`w-full px-5 py-4 bg-slate-50 border-2 rounded-2xl focus:ring-4 transition-all outline-none ${errors.slug
-                                ? 'border-red-100 focus:border-red-500 focus:ring-red-500/10 text-red-900'
-                                : 'border-slate-100 focus:border-cyan-500 focus:ring-cyan-500/10 text-slate-700'
+                            ? 'border-red-100 focus:border-red-500 focus:ring-red-500/10 text-red-900'
+                            : 'border-slate-100 focus:border-cyan-500 focus:ring-cyan-500/10 text-slate-700'
                             }`}
                     />
                     {errors.slug && (
@@ -143,15 +143,15 @@ export function ModuloForm({ modulo, onSubmit, onCancel, isLoading }: ModuloForm
                     className="flex-1 rounded-2xl py-6 font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-all"
                     disabled={isLoading}
                 >
-                    Cancelar
+                    CANCELAR
                 </Button>
                 <Button
                     type="submit"
                     loading={isLoading}
                     disabled={isLoading}
-                    className="flex-1 rounded-2xl py-6 font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg shadow-cyan-500/25 transition-all"
+                    className="flex-1 rounded-2xl py-6 font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/25 transition-all"
                 >
-                    {modulo ? 'Guardar Cambios' : 'Crear Módulo'}
+                    {modulo ? 'ACTUALIZAR' : 'GUARDAR'}
                 </Button>
             </div>
         </form>

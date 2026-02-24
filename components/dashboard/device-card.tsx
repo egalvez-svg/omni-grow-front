@@ -4,6 +4,8 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import Link from 'next/link'
 import { SensorChart } from './sensor-chart'
+import { ChevronRight } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import type { Dispositivo } from '@/lib/types/api'
 import type { TimeRange } from '@/lib/utils/mock-sensor-data'
 import { fetchDeviceById } from '@/lib/api/devices-service'
@@ -17,12 +19,18 @@ interface DeviceCardProps {
     detailLinkPath?: string
     timeRange?: TimeRange
     onTimeRangeChange?: (range: TimeRange) => void
+    compact?: boolean
 }
 
-export function DeviceCard({ device: initialDevice, onToggleActuador, onRefresh, isRefreshing: parentRefreshing, showDetailLink = true, detailLinkPath, timeRange = '24H', onTimeRangeChange }: DeviceCardProps) {
+export function DeviceCard({ device: initialDevice, onToggleActuador, onRefresh, isRefreshing: parentRefreshing, showDetailLink = true, detailLinkPath, timeRange = '24H', onTimeRangeChange, compact = false }: DeviceCardProps) {
+    const router = useRouter()
     // Use the device provided by parent - no need to fetch again
     const device = initialDevice
     const isRefreshing = parentRefreshing
+
+    const handleCardClick = () => {
+        router.push(detailLinkPath || `/admin/dispositivos/${device.id}`)
+    }
 
     const sensores = device.gpios?.filter(gpio =>
         gpio.tipo === 'sensor' && gpio.sensores && gpio.sensores.length > 0
@@ -32,8 +40,13 @@ export function DeviceCard({ device: initialDevice, onToggleActuador, onRefresh,
     ) || []
 
     return (
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 hover:shadow-md transition-all duration-300">
-            <div className="mb-5 flex items-start justify-between gap-4">
+        <div
+            onClick={handleCardClick}
+            className={`@container group bg-white rounded-3xl shadow-sm border border-slate-100 font-sans hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden relative ${compact ? 'p-4' : 'p-6'}`}
+        >
+            {/* Pro Max Decorative Blob */}
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-indigo-500/10 to-emerald-500/10 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-150 duration-500" />
+            <div className={`flex items-start justify-between gap-4 ${compact ? 'mb-3' : 'mb-5'}`}>
                 <div className="flex-1 min-w-0">
                     <h3 className="text-lg font-semibold text-slate-800 " title={device.nombre}>
                         {device.nombre}
@@ -62,7 +75,10 @@ export function DeviceCard({ device: initialDevice, onToggleActuador, onRefresh,
                             {(['1H', '12H', '24H'] as TimeRange[]).map((range) => (
                                 <button
                                     key={range}
-                                    onClick={() => onTimeRangeChange?.(range)}
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        onTimeRangeChange?.(range)
+                                    }}
                                     className={`px-2.5 py-1 text-xs font-medium rounded transition-colors ${timeRange === range
                                         ? 'bg-white text-slate-800 shadow-sm'
                                         : 'text-slate-600 hover:text-slate-800'
@@ -75,7 +91,10 @@ export function DeviceCard({ device: initialDevice, onToggleActuador, onRefresh,
                     )}
 
                     <button
-                        onClick={() => onRefresh?.()}
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            onRefresh?.()
+                        }}
                         disabled={isRefreshing}
                         className={`p-2 text-slate-400 hover:text-cyan-500 hover:bg-cyan-50 rounded-xl transition-all duration-200 ${isRefreshing ? 'cursor-not-allowed opacity-60' : ''
                             }`}
@@ -92,16 +111,19 @@ export function DeviceCard({ device: initialDevice, onToggleActuador, onRefresh,
                     </button>
 
                     {showDetailLink && (
-                        <Link
-                            href={detailLinkPath || `/admin/dispositivos/${device.id}`}
-                            className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all duration-200"
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                router.push(detailLinkPath || `/admin/dispositivos/${device.id}`)
+                            }}
+                            className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all duration-200 relative z-10"
                             title="Ver detalle completo"
                         >
                             <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
-                        </Link>
+                        </button>
                     )}
                 </div>
             </div>
@@ -109,7 +131,7 @@ export function DeviceCard({ device: initialDevice, onToggleActuador, onRefresh,
             {sensores.length > 0 && (
                 <div className="mb-5">
                     <h4 className="text-xs font-medium text-slate-600 uppercase tracking-wide mb-3">Sensores</h4>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 @[400px]:grid-cols-2 gap-3">
                         {sensores.flatMap(gpio =>
                             (gpio.sensores || []).map(sensor => ({ ...sensor, gpioName: gpio.nombre }))
                         ).sort((a, b) => {
@@ -210,7 +232,8 @@ export function DeviceCard({ device: initialDevice, onToggleActuador, onRefresh,
                                             </span>
                                         </div>
                                         <button
-                                            onClick={() => {
+                                            onClick={(e) => {
+                                                e.stopPropagation()
                                                 onToggleActuador(actuador.id, currentState)
                                             }}
                                             className={`relative inline-flex h-7 w-14 items-center rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ${currentState
@@ -244,13 +267,13 @@ export function DeviceCard({ device: initialDevice, onToggleActuador, onRefresh,
                 </div>
             )}
 
-            <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-                <div className="flex items-center gap-1.5">
+            <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col @[400px]:flex-row @[400px]:items-center justify-between gap-4">
+                <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-medium order-2 @[400px]:order-1">
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span>
-                        Actualizado: {(device as any).lecturasActuales?.length > 0
+                        {(device as any).lecturasActuales?.length > 0
                             ? new Date(device.ultimaActualizacion)
                                 .toLocaleString('es-ES', {
                                     day: '2-digit',
@@ -258,9 +281,22 @@ export function DeviceCard({ device: initialDevice, onToggleActuador, onRefresh,
                                     hour: '2-digit',
                                     minute: '2-digit'
                                 })
-                            : 'Sin datos recientes'}
+                            : 'Sin datos'}
                     </span>
                 </div>
+
+                {showDetailLink && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            router.push(detailLinkPath || `/admin/dispositivos/${device.id}`)
+                        }}
+                        className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-slate-50 text-slate-600 font-black uppercase tracking-widest text-[9px] group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 group/btn order-1 @[400px]:order-2 relative z-10"
+                    >
+                        VER DETALLE
+                        <ChevronRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
+                    </button>
+                )}
             </div>
         </div>
     )

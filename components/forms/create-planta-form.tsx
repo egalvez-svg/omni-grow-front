@@ -4,8 +4,9 @@ import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { addPlantaToCultivo, updatePlanta } from '@/lib/api/cultivos-service'
 import { CreatePlantaDto, Planta } from '@/lib/types/api'
-import { Plus, Sprout, Hash, MapPin, Calendar, AlignLeft, Activity, Save } from 'lucide-react'
+import { Plus, Sprout, Hash, MapPin, Calendar, AlignLeft, Activity, Check } from 'lucide-react'
 import { ErrorMessage } from '@/components/ui/error-message'
+import { Select } from '@/components/ui'
 import { useToast } from '@/providers/toast-provider'
 import { cn } from '@/lib/utils'
 import type { Variedad } from '@/lib/types/api'
@@ -162,7 +163,7 @@ export function CreatePlantaForm({
                             onClick={() => setIsBulkMode(!isBulkMode)}
                             className={cn(
                                 "relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500/20",
-                                isBulkMode ? "bg-emerald-600" : "bg-slate-200"
+                                isBulkMode ? "bg-indigo-600" : "bg-slate-200"
                             )}
                         >
                             <span
@@ -176,23 +177,18 @@ export function CreatePlantaForm({
                 )}
 
                 {/* Variety Selector */}
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                        <Sprout className="w-4 h-4 text-emerald-500" />
-                        Variedad
-                    </label>
-                    <select
-                        required
-                        value={variedadId || ''}
-                        onChange={(e) => setVariedadId(e.target.value ? parseInt(e.target.value) : undefined)}
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium text-slate-900"
-                    >
-                        <option value="">Selecciona variedad</option>
-                        {variedades.map(v => (
-                            <option key={v.id} value={v.id}>{v.nombre}</option>
-                        ))}
-                    </select>
-                </div>
+                <Select
+                    label="Variedad"
+                    required
+                    icon={<Sprout className="w-4 h-4" />}
+                    value={variedadId || ''}
+                    onChange={(e) => setVariedadId(e.target.value ? parseInt(e.target.value) : undefined)}
+                >
+                    <option value="">Selecciona variedad</option>
+                    {variedades.map(v => (
+                        <option key={v.id} value={v.id}>{v.nombre}</option>
+                    ))}
+                </Select>
 
                 {isBulkMode && !isEdit && (
                     <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
@@ -208,15 +204,14 @@ export function CreatePlantaForm({
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-bold text-slate-700">Dirección</label>
-                            <select
+                            <Select
+                                label="Dirección"
                                 value={bulkDirection}
                                 onChange={(e) => setBulkDirection(e.target.value as any)}
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                             >
                                 <option value="horizontal">Horizontal (→)</option>
                                 <option value="vertical">Vertical (↓)</option>
-                            </select>
+                            </Select>
                         </div>
                     </div>
                 )}
@@ -293,21 +288,16 @@ export function CreatePlantaForm({
                     </div>
 
                     {/* Estado */}
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                            <Activity className="w-4 h-4 text-emerald-500" />
-                            Estado
-                        </label>
-                        <select
-                            value={estado}
-                            onChange={(e) => setEstado(e.target.value as any)}
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium text-slate-900"
-                        >
-                            <option value="activa">Activa</option>
-                            <option value="removida">Removida</option>
-                            <option value="cosechada">Cosechada</option>
-                        </select>
-                    </div>
+                    <Select
+                        label="Estado"
+                        icon={<Activity className="w-4 h-4" />}
+                        value={estado}
+                        onChange={(e) => setEstado(e.target.value as any)}
+                    >
+                        <option value="activa">Activa</option>
+                        <option value="removida">Removida</option>
+                        <option value="cosechada">Cosechada</option>
+                    </Select>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -382,17 +372,17 @@ export function CreatePlantaForm({
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="flex-1 px-6 py-3 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-all"
+                    className="flex-1 px-6 py-3 border border-slate-200 text-slate-600 font-black uppercase tracking-widest text-[11px] rounded-xl hover:bg-slate-50 transition-all"
                 >
-                    Cancelar
+                    CANCELAR
                 </button>
                 <button
                     type="submit"
                     disabled={mutation.isPending}
-                    className="flex-1 px-6 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="flex-1 px-6 py-3 bg-indigo-600 text-white font-black uppercase tracking-widest text-[11px] rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                    {mutation.isPending ? 'Guardando...' : (isEdit ? 'Guardar' : (isBulkMode ? 'Registrar Plantas' : 'Registrar Planta'))}
-                    {!mutation.isPending && (isEdit ? <Save className="w-5 h-5" /> : <Plus className="w-5 h-5" />)}
+                    {mutation.isPending ? 'PROCESANDO' : (isEdit ? 'ACTUALIZAR' : 'GUARDAR')}
+                    {!mutation.isPending && (isEdit ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />)}
                 </button>
             </div>
         </form>

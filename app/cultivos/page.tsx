@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { fetchActiveCultivos, fetchAllCultivos, deleteCultivo } from '@/lib/api/cultivos-service'
 import { Cultivo } from '@/lib/types/api'
 import { CropCard } from '@/components/cultivos/crop-card'
-import { LoadingSpinner } from '@/components/ui'
+import { LoadingSpinner, Button } from '@/components/ui'
 import { DashboardHeader } from '@/components/dashboard'
 import { Plus, Search, Filter, History, Sprout, Activity, Trash2 } from 'lucide-react'
 import { useState } from 'react'
@@ -58,39 +58,39 @@ export default function CultivosPage() {
         <div className="min-h-screen bg-slate-50/50">
             <DashboardHeader title="Control de Cultivos" />
 
-            <div className="max-w-7xl mx-auto px-6 py-8">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+            <div className="max-w-7xl mx-auto px-[var(--space-md)] py-[var(--space-lg)]">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-[var(--space-md)] mb-[var(--space-lg)]">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Ciclos de Cultivo</h1>
-                        <p className="text-slate-500 mt-1">Supervisa y gestiona cada etapa de tus plantas.</p>
+                        <h1 className="text-5xl font-black text-slate-900 tracking-tighter leading-none">Control de Cultivos</h1>
+                        <p className="text-slate-500 mt-2 font-medium text-lg leading-snug">Gestiona tus ciclos de cultivo con precisión quirúrgica.</p>
                     </div>
 
-                    <button
+                    <Button
                         onClick={() => setIsAddModalOpen(true)}
-                        className="flex items-center justify-center gap-2 px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl transition-all shadow-lg shadow-sky-600/20 group"
+                        icon={<Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />}
+                        className="group py-4 px-8 rounded-2xl shadow-xl shadow-indigo-600/20"
                     >
-                        <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-                        Nuevo Cultivo
-                    </button>
+                        AÑADIR CULTIVO
+                    </Button>
                 </div>
 
                 {/* Filters & Search */}
                 <div className="flex flex-col sm:flex-row items-center gap-4 mb-8">
-                    <div className="relative flex-1 w-full">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <div className="relative flex-1 w-full group">
+                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
                         <input
                             type="text"
                             placeholder="Buscar cultivo o variedad..."
-                            className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all shadow-sm"
+                            className="w-full pl-14 pr-6 py-4 bg-white border border-slate-100 rounded-[1.5rem] focus:outline-none focus:ring-4 focus:ring-indigo-600/5 focus:border-indigo-500 transition-all shadow-sm font-medium"
                         />
                     </div>
 
-                    <div className="flex items-center bg-white border border-slate-200 rounded-2xl p-1.5 shadow-sm">
+                    <div className="flex items-center bg-white border border-slate-100 rounded-[1.25rem] p-1.5 shadow-sm">
                         <button
                             onClick={() => setShowActiveOnly(true)}
                             className={cn(
-                                "px-5 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2",
-                                showActiveOnly ? "bg-sky-50 text-sky-600" : "text-slate-500 hover:text-slate-700"
+                                "px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all flex items-center gap-2",
+                                showActiveOnly ? "bg-slate-900 text-white shadow-lg shadow-slate-900/20" : "text-slate-400 hover:text-slate-600"
                             )}
                         >
                             <Activity className="w-4 h-4" />
@@ -99,8 +99,8 @@ export default function CultivosPage() {
                         <button
                             onClick={() => setShowActiveOnly(false)}
                             className={cn(
-                                "px-5 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2",
-                                !showActiveOnly ? "bg-sky-50 text-sky-600" : "text-slate-500 hover:text-slate-700"
+                                "px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all flex items-center gap-2",
+                                !showActiveOnly ? "bg-slate-900 text-white shadow-lg shadow-slate-900/20" : "text-slate-400 hover:text-slate-600"
                             )}
                         >
                             <History className="w-4 h-4" />
@@ -120,12 +120,15 @@ export default function CultivosPage() {
                         </div>
                         <h3 className="text-2xl font-bold text-red-900 mb-2">Error de conexión</h3>
                         <p className="text-red-700">Ocurrió un problema al sincronizar tus cultivos. Por favor, verifica tu conexión.</p>
-                        <button className="mt-8 px-6 py-2.5 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-600/20">
-                            Reintentar ahora
-                        </button>
+                        <Button variant="danger" size="md" className="mt-8">
+                            REINTENTAR AHORA
+                        </Button>
                     </div>
                 ) : cultivos && cultivos.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div
+                        className="grid gap-8"
+                        style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))' }}
+                    >
                         {cultivos.map((cultivo) => (
                             <CropCard
                                 key={cultivo.id}
@@ -144,12 +147,13 @@ export default function CultivosPage() {
                         <p className="text-slate-500 text-lg max-w-md mx-auto leading-relaxed">
                             No tienes {showActiveOnly ? 'cultivos activos' : 'ningún historial de cultivo'} en este momento.
                         </p>
-                        <button
+                        <Button
                             onClick={() => setIsAddModalOpen(true)}
-                            className="mt-10 px-10 py-4 bg-sky-600 text-white font-bold rounded-2xl hover:bg-sky-700 transition-all shadow-xl shadow-sky-600/30 hover:scale-105 active:scale-95"
+                            size="lg"
+                            className="mt-10"
                         >
-                            Empezar mi primer cultivo
-                        </button>
+                            AÑADIR
+                        </Button>
                     </div>
                 )}
             </div>

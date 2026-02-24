@@ -1,5 +1,11 @@
 import apiClient from '@/lib/api/client'
-import type { Variedad, CreateVariedadDto, Producto, CreateProductoDto } from '@/lib/types/api'
+import type { Variedad, CreateVariedadDto, Producto, CreateProductoDto, Fase, ProductoTipo } from '@/lib/types/api'
+
+// Fases
+export async function fetchFases(): Promise<Fase[]> {
+    const response = await apiClient.get<Fase[]>('/fases')
+    return response.data
+}
 
 // Variedades
 export async function fetchVariedades(): Promise<Variedad[]> {
@@ -51,4 +57,10 @@ export async function updateProducto(id: number, data: Partial<CreateProductoDto
 
 export async function deleteProducto(id: number): Promise<void> {
     await apiClient.delete(`/productos/${id}`)
+}
+
+// Tipos de Productos
+export async function fetchProductoTipos(): Promise<ProductoTipo[]> {
+    const response = await apiClient.get<ProductoTipo[]>('/productos-tipos')
+    return response.data
 }

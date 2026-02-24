@@ -211,13 +211,13 @@ export default function CamaDetailPage() {
                             <ArrowLeft className="w-5 h-5" />
                         </button>
                         <div>
-                            <div className="flex items-center gap-2 text-slate-400 text-sm mb-1 font-bold uppercase tracking-widest">
-                                <Layers className="w-4 h-4" />
+                            <div className="flex items-center gap-2 text-slate-400 text-[11px] mb-1 font-black uppercase tracking-widest opacity-70">
+                                <Layers className="w-4 h-4 text-indigo-500" />
                                 <span>{cama.sala?.nombre || 'Sala'}</span>
                                 <ChevronRight className="w-4 h-4" />
                                 <span>{cama.nombre}</span>
                             </div>
-                            <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                            <h1>
                                 {cama.nombre}
                                 {cultivoActivo && (
                                     <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-black uppercase tracking-widest border border-emerald-200">
@@ -232,10 +232,10 @@ export default function CamaDetailPage() {
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={() => setActiveTab('nutricion')}
-                                className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-2xl hover:bg-slate-50 transition-all shadow-sm"
+                                className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-slate-50 transition-all shadow-sm active:scale-95"
                             >
                                 <Activity className="w-5 h-5 text-indigo-500" />
-                                Estado Vital
+                                ESTADO VITAL
                             </button>
                             {/* <button
                                 onClick={() => setIsAddNutricionModalOpen(true)}
@@ -257,19 +257,19 @@ export default function CamaDetailPage() {
                                     <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
                                         <TrendingUp className="w-6 h-6" />
                                     </div>
-                                    <h2 className="text-xl font-black text-slate-800">Cultivo Actual</h2>
+                                    <h2>Cultivo Actual</h2>
                                 </div>
 
                                 <div className="space-y-4">
                                     <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100">
-                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Nombre del Ciclo</span>
-                                        <p className="text-slate-900 font-bold">{cultivoActivo.nombre}</p>
+                                        <span className="text-[10px] font-black text-slate-400 block mb-1 uppercase tracking-wider opacity-70">Nombre del Ciclo</span>
+                                        <p className="text-slate-900 font-black text-lg tracking-tight">{cultivoActivo.nombre}</p>
                                     </div>
 
                                     <div className="p-4 rounded-3xl bg-indigo-50/50 border border-indigo-100">
                                         <div className="flex items-center gap-2 mb-1">
                                             <Dna className="w-4 h-4 text-indigo-500" />
-                                            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+                                            <span className="text-[9px] font-black text-indigo-400">
                                                 {cultivoActivo.variedades && cultivoActivo.variedades.length > 1 ? 'Variedades' : 'Variedad'}
                                             </span>
                                         </div>
@@ -284,12 +284,12 @@ export default function CamaDetailPage() {
                                     <div className="grid grid-cols-2 gap-3">
                                         <div className="p-4 rounded-3xl bg-emerald-50 border border-emerald-100 text-center">
                                             <Calendar className="w-5 h-5 text-emerald-500 mx-auto mb-2" />
-                                            <span className="text-[9px] font-black text-emerald-400 uppercase block tracking-widest mb-1">Día de Ciclo</span>
+                                            <span className="text-[8px] font-black text-emerald-400 block mb-1">Día de Ciclo</span>
                                             <p className="text-emerald-900 font-black text-2xl">{cultivoActivo.dias_ciclo || 0}</p>
                                         </div>
                                         <div className="p-4 rounded-3xl bg-amber-50 border border-amber-100 text-center">
                                             <Sprout className="w-5 h-5 text-amber-500 mx-auto mb-2" />
-                                            <span className="text-[9px] font-black text-amber-400 uppercase block tracking-widest mb-1">Plantas</span>
+                                            <span className="text-[8px] font-black text-amber-400 block mb-1">Plantas</span>
                                             <p className="text-amber-900 font-black text-2xl">{cultivoActivo.plantas?.length || 0}</p>
                                         </div>
                                     </div>
@@ -300,8 +300,8 @@ export default function CamaDetailPage() {
                                 <button
                                     onClick={() => setActiveTab('nutricion')}
                                     className={cn(
-                                        "flex items-center gap-3 px-6 py-4 rounded-2xl font-bold transition-all",
-                                        activeTab === 'nutricion' ? "bg-slate-900 text-white shadow-lg shadow-slate-900/10" : "text-slate-500 hover:bg-slate-50"
+                                        "flex items-center gap-3 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all",
+                                        activeTab === 'nutricion' ? "bg-slate-900 text-white shadow-xl shadow-slate-900/20 -translate-y-0.5" : "text-slate-500 hover:bg-slate-50"
                                     )}
                                 >
                                     <Activity className="w-5 h-5" />
@@ -310,8 +310,8 @@ export default function CamaDetailPage() {
                                 <button
                                     onClick={() => setActiveTab('info')}
                                     className={cn(
-                                        "flex items-center gap-3 px-6 py-4 rounded-2xl font-bold transition-all",
-                                        activeTab === 'info' ? "bg-slate-900 text-white shadow-lg shadow-slate-900/10" : "text-slate-500 hover:bg-slate-50"
+                                        "flex items-center gap-3 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all",
+                                        activeTab === 'info' ? "bg-slate-900 text-white shadow-xl shadow-slate-900/20 -translate-y-0.5" : "text-slate-500 hover:bg-slate-50"
                                     )}
                                 >
                                     <ClipboardList className="w-5 h-5" />
@@ -320,8 +320,8 @@ export default function CamaDetailPage() {
                                 <button
                                     onClick={() => setActiveTab('plantas')}
                                     className={cn(
-                                        "flex items-center gap-3 px-6 py-4 rounded-2xl font-bold transition-all",
-                                        activeTab === 'plantas' ? "bg-slate-900 text-white shadow-lg shadow-slate-900/10" : "text-slate-500 hover:bg-slate-50"
+                                        "flex items-center gap-3 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all",
+                                        activeTab === 'plantas' ? "bg-slate-900 text-white shadow-xl shadow-slate-900/20 -translate-y-0.5" : "text-slate-500 hover:bg-slate-50"
                                     )}
                                 >
                                     <Grid className="w-5 h-5" />
@@ -333,8 +333,8 @@ export default function CamaDetailPage() {
                                         <button
                                             onClick={() => setActiveTab('clima')}
                                             className={cn(
-                                                "flex items-center gap-3 px-6 py-4 rounded-2xl font-bold transition-all",
-                                                activeTab === 'clima' ? "bg-slate-900 text-white shadow-lg shadow-slate-900/10" : "text-slate-500 hover:bg-slate-50"
+                                                "flex items-center gap-3 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all",
+                                                activeTab === 'clima' ? "bg-slate-900 text-white shadow-xl shadow-slate-900/20 -translate-y-0.5" : "text-slate-500 hover:bg-slate-50"
                                             )}
                                         >
                                             <Thermometer className="w-5 h-5" />
@@ -346,8 +346,8 @@ export default function CamaDetailPage() {
                                 <button
                                     onClick={() => setActiveTab('analisis')}
                                     className={cn(
-                                        "flex items-center gap-3 px-6 py-4 rounded-2xl font-bold transition-all",
-                                        activeTab === 'analisis' ? "bg-slate-900 text-white shadow-lg shadow-slate-900/10" : "text-slate-500 hover:bg-slate-50"
+                                        "flex items-center gap-3 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all",
+                                        activeTab === 'analisis' ? "bg-slate-900 text-white shadow-xl shadow-slate-900/20 -translate-y-0.5" : "text-slate-500 hover:bg-slate-50"
                                     )}
                                 >
                                     <Sparkles className="w-5 h-5" />
@@ -362,15 +362,14 @@ export default function CamaDetailPage() {
                                 <div className="space-y-6">
                                     <div className="bg-white rounded-[3rem] border border-slate-200 p-10 shadow-sm relative overflow-hidden">
                                         <div className="relative z-10">
-                                            <h2 className="text-2xl font-black text-slate-800 mb-8 flex items-center gap-3">
-                                                <FileText className="w-7 h-7 text-sky-500" />
+                                            <h2>
                                                 Detalles del Ciclo
                                             </h2>
 
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                                 <div className="space-y-6">
                                                     <div>
-                                                        <span className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] block mb-3">Fecha de Inicio</span>
+                                                        <span className="text-[9px] font-black text-slate-400 block mb-3">Fecha de Inicio</span>
                                                         <div className="flex items-center gap-4 text-slate-700 font-bold text-lg">
                                                             <div className="w-12 h-12 rounded-2xl bg-sky-50 flex items-center justify-center text-sky-600">
                                                                 <Calendar className="w-6 h-6" />
@@ -385,8 +384,7 @@ export default function CamaDetailPage() {
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="bg-white rounded-[2.5rem] border border-slate-200 p-8 shadow-sm">
-                                            <h3 className="text-lg font-black text-slate-800 mb-6 flex items-center gap-2 text-sky-600">
-                                                <MapPin className="w-5 h-5" />
+                                            <h3>
                                                 Ubicación en Grid
                                             </h3>
                                             <div className="p-4 bg-slate-50 rounded-3xl border border-slate-100 flex items-center justify-between">
@@ -401,15 +399,14 @@ export default function CamaDetailPage() {
                             {activeTab === 'plantas' && (
                                 <div className="bg-white rounded-[3rem] border border-slate-200 p-10 shadow-sm">
                                     <div className="flex items-center justify-between mb-10">
-                                        <h2 className="text-2xl font-black text-slate-800 flex items-center gap-3">
-                                            <Grid className="w-7 h-7 text-indigo-500" />
+                                        <h2>
                                             Inventario Visual
                                         </h2>
                                         <div className="flex items-center gap-4 bg-slate-50 p-2 rounded-2xl">
-                                            <span className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase px-3">
+                                            <span className="flex items-center gap-2 text-[9px] font-black text-slate-400 px-3">
                                                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/30" /> Ocupado
                                             </span>
-                                            <span className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase px-3">
+                                            <span className="flex items-center gap-2 text-[9px] font-black text-slate-400 px-3">
                                                 <div className="w-2.5 h-2.5 rounded-full bg-slate-200" /> Disponible
                                             </span>
                                         </div>
@@ -423,16 +420,15 @@ export default function CamaDetailPage() {
                             {activeTab === 'nutricion' && (
                                 <div className="bg-white rounded-[3rem] border border-slate-200 p-10 shadow-sm">
                                     <div className="flex items-center justify-between mb-10">
-                                        <h2 className="text-2xl font-black text-slate-800 flex items-center gap-3">
-                                            <FlaskConical className="w-7 h-7 text-amber-500" />
+                                        <h2>
                                             Historial Nutricional
                                         </h2>
                                         <button
                                             onClick={() => setIsAddNutricionModalOpen(true)}
-                                            className="px-6 py-3 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10 flex items-center gap-2"
+                                            className="px-5 py-2.5 bg-indigo-600 text-white font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 flex items-center gap-2 active:scale-95"
                                         >
-                                            <Plus className="w-5 h-5" />
-                                            Nuevo Registro
+                                            <Plus className="w-4 h-4" />
+                                            AÑADIR RIEGO
                                         </button>
                                     </div>
 
@@ -446,11 +442,11 @@ export default function CamaDetailPage() {
                                                     <div className="bg-slate-50 rounded-[2.5rem] p-8 border border-white shadow-sm hover:border-indigo-200 transition-all">
                                                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                                                             <div>
-                                                                <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest block mb-1">Aplicación de {log.tipo_riego}</span>
+                                                                <span className="text-[9px] font-black text-indigo-500 block mb-1">Aplicación de {log.tipo_riego}</span>
                                                                 <h4 className="text-xl font-black text-slate-800">{formatLocalDate(log.fecha_aplicacion)}</h4>
                                                             </div>
                                                             <div className="flex items-center gap-3 self-start">
-                                                                <span className="px-4 py-1.5 bg-white text-slate-600 rounded-full text-xs font-black shadow-sm border border-slate-100 uppercase tracking-widest">
+                                                                <span className="px-4 py-1.5 bg-white text-slate-600 rounded-full text-[10px] font-black shadow-sm border border-slate-100">
                                                                     Semana {log.semana}
                                                                 </span>
                                                                 <button
@@ -470,21 +466,21 @@ export default function CamaDetailPage() {
 
                                                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                                                             <div className="p-4 bg-white rounded-3xl border border-slate-100">
-                                                                <span className="text-[10px] font-black text-slate-400 block mb-1 uppercase tracking-widest">Solución Total</span>
+                                                                <span className="text-[9px] font-black text-slate-400 block mb-1">Solución Total</span>
                                                                 <p className="text-slate-900 font-bold flex items-center gap-2">
                                                                     <Droplets className="w-4 h-4 text-sky-400" />
                                                                     {log.litros_agua} Litros
                                                                 </p>
                                                             </div>
                                                             <div className="p-4 bg-white rounded-3xl border border-slate-100">
-                                                                <span className="text-[10px] font-black text-slate-400 block mb-1 uppercase tracking-widest">Potencial H+</span>
+                                                                <span className="text-[9px] font-black text-slate-400 block mb-1">Potencial H+</span>
                                                                 <p className="text-slate-900 font-bold flex items-center gap-2">
                                                                     <Beaker className="w-4 h-4 text-amber-500" />
                                                                     {log.ph} pH
                                                                 </p>
                                                             </div>
                                                             <div className="p-4 bg-white rounded-3xl border border-slate-100">
-                                                                <span className="text-[10px] font-black text-slate-400 block mb-1 uppercase tracking-widest">Cond. Elect.</span>
+                                                                <span className="text-[9px] font-black text-slate-400 block mb-1">Cond. Elect.</span>
                                                                 <p className="text-slate-900 font-bold flex items-center gap-2">
                                                                     <Activity className="w-4 h-4 text-emerald-500" />
                                                                     {log.ec} EC
@@ -499,7 +495,7 @@ export default function CamaDetailPage() {
                                                                     log.productos.map((prod) => (
                                                                         <div key={prod.id} className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-xl border border-indigo-100">
                                                                             <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-                                                                            <span className="text-[10px] font-black uppercase tracking-tight">
+                                                                            <span className="text-[9px] font-black">
                                                                                 {prod.productoNutricion?.nombre}: {prod.dosis_por_litro} ml/L
                                                                             </span>
                                                                         </div>
@@ -530,8 +526,7 @@ export default function CamaDetailPage() {
                             {activeTab === 'clima' && (
                                 <div className="space-y-6">
                                     <div className="flex items-center justify-between mb-4">
-                                        <h2 className="text-2xl font-black text-slate-800 flex items-center gap-3">
-                                            <Thermometer className="w-7 h-7 text-sky-500" />
+                                        <h2>
                                             Monitoreo de Clima
                                         </h2>
                                     </div>

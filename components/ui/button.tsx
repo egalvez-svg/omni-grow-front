@@ -24,19 +24,19 @@ export function Button({
     className = '',
     ...props
 }: ButtonProps) {
-    const baseStyles = 'inline-flex items-center justify-center font-medium rounded transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2'
+    const baseStyles = 'inline-flex items-center justify-center font-black uppercase tracking-widest rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 active:scale-[0.98] disabled:opacity-50'
 
     const variantStyles = {
-        primary: 'bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500 disabled:bg-blue-400',
-        secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-900 focus:ring-gray-500 disabled:bg-gray-100',
-        danger: 'bg-red-600 hover:bg-red-700 text-white focus:ring-red-500 disabled:bg-red-400',
-        ghost: 'bg-transparent hover:bg-gray-100 text-gray-700 focus:ring-gray-500'
+        primary: 'bg-indigo-600 hover:bg-indigo-700 text-white focus:ring-indigo-500 shadow-lg shadow-indigo-600/20 disabled:bg-indigo-400',
+        secondary: 'bg-slate-100 hover:bg-slate-200 text-slate-700 focus:ring-slate-500 disabled:bg-slate-50',
+        danger: 'bg-rose-600 hover:bg-rose-700 text-white focus:ring-rose-500 disabled:bg-rose-400',
+        ghost: 'bg-transparent hover:bg-slate-100 text-slate-700 focus:ring-slate-500'
     }
 
     const sizeStyles = {
-        sm: 'px-3 py-1.5 text-xs gap-1.5',
-        md: 'px-4 py-2 text-sm gap-2',
-        lg: 'px-6 py-3 text-base gap-2'
+        sm: 'px-4 py-2 text-[9px] gap-1.5',
+        md: 'px-6 py-3 text-[10px] gap-2',
+        lg: 'px-8 py-4 text-[12px] gap-2'
     }
 
     const widthStyles = fullWidth ? 'w-full' : ''

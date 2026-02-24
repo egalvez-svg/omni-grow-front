@@ -5,8 +5,9 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { registerNutricion, updateNutricion } from '@/lib/api/cultivos-service'
 import { fetchProductos } from '@/lib/api/catalogos-service'
 import { CreateNutricionDto, ProductoRiegoDto, NutricionSemanal } from '@/lib/types/api'
-import { Plus, FlaskConical, Droplets, Calendar, AlignLeft, Activity, Hash, Trash2, Beaker, TrendingUp, Save } from 'lucide-react'
+import { Plus, FlaskConical, Droplets, Calendar, AlignLeft, Activity, Hash, Trash2, Beaker, TrendingUp, Check, ShoppingBag } from 'lucide-react'
 import { ErrorMessage } from '@/components/ui/error-message'
+import { Select } from '@/components/ui'
 import { useToast } from '@/providers/toast-provider'
 import { cn } from '@/lib/utils'
 
@@ -54,7 +55,7 @@ function NumericInput({
                 }}
                 placeholder={placeholder}
                 className={cn(
-                    "w-full pr-4 py-3 bg-white border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-bold text-slate-800",
+                    "w-full pr-4 py-3.5 bg-white border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 transition-all font-bold text-slate-800",
                     Icon ? "pl-12" : "px-4",
                     className
                 )}
@@ -99,6 +100,7 @@ export function CreateNutricionForm({ cultivoId, onSuccess, onCancel, initialDat
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['cultivo', cultivoId] })
             queryClient.invalidateQueries({ queryKey: ['nutricion', cultivoId] })
+            queryClient.invalidateQueries({ queryKey: ['timeline', cultivoId] })
             showToast(initialData ? '¡Registro actualizado!' : '¡Registro nutricional guardado!', 'success')
             onSuccess()
         },
@@ -131,6 +133,7 @@ export function CreateNutricionForm({ cultivoId, onSuccess, onCancel, initialDat
 
         const payload: CreateNutricionDto = {
             semana: semana ? parseInt(semana) : undefined,
+            faseHistorialId: initialData?.faseHistorialId,
             tipo_riego: tipoRiego,
             fecha_aplicacion: fechaAplicacion,
             litros_agua: parseFloat(litrosAgua) || 0,
@@ -179,7 +182,7 @@ export function CreateNutricionForm({ cultivoId, onSuccess, onCancel, initialDat
                                             className={cn(
                                                 "flex items-center gap-3 px-4 py-3 rounded-2xl border-2 transition-all font-bold text-sm text-left",
                                                 isSelected
-                                                    ? "bg-sky-600 border-sky-600 text-white shadow-lg shadow-sky-600/20"
+                                                    ? "bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-600/20"
                                                     : "bg-white border-slate-100 text-slate-500 hover:border-sky-200"
                                             )}
                                         >
@@ -279,44 +282,38 @@ export function CreateNutricionForm({ cultivoId, onSuccess, onCancel, initialDat
                             <Beaker className="w-4 h-4" />
                             Mezcla de Productos
                         </h3>
-                        <button
-                            type="button"
-                            onClick={handleAddProduct}
-                            className="text-xs font-black text-sky-600 uppercase flex items-center gap-1 hover:text-sky-700 transition-colors bg-sky-50 px-4 py-2 rounded-xl active:scale-95 transition-all"
-                        >
-                            <Plus className="w-4 h-4" />
-                            Añadir Producto
-                        </button>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {selectedProductos.length === 0 ? (
-                            <div className="md:col-span-2 p-10 border-2 border-dashed border-slate-100 rounded-[3rem] text-center flex flex-col items-center justify-center bg-slate-50/50">
-                                <FlaskConical className="w-12 h-12 text-slate-200 mb-4" />
-                                <p className="text-base font-bold text-slate-400">No hay productos en la mezcla.</p>
-                                <button
-                                    type="button"
-                                    onClick={handleAddProduct}
-                                    className="mt-4 text-sm font-bold text-sky-600 hover:underline"
-                                >
-                                    Haz clic para añadir el primero
-                                </button>
-                            </div>
+                            <button
+                                type="button"
+                                onClick={handleAddProduct}
+                                className="md:col-span-2 p-8 border-2 border-dashed border-slate-100 rounded-[2rem] text-center flex flex-col items-center justify-center bg-slate-50/50 hover:bg-sky-50/30 hover:border-sky-200 transition-all group antialiased"
+                            >
+                                <FlaskConical className="w-10 h-10 text-slate-200 mb-3 group-hover:text-sky-200 transition-all duration-300" />
+                                <p className="text-sm font-bold text-slate-400 group-hover:text-slate-600 transition-colors">No hay productos en la mezcla.</p>
+                                <span className="mt-3 text-[10px] font-black text-sky-600 uppercase tracking-widest bg-sky-50 px-4 py-1.5 rounded-full border border-sky-100 group-hover:bg-sky-600 group-hover:text-white transition-all">
+                                    Añadir producto
+                                </span>
+                            </button>
                         ) : (
                             selectedProductos.map((p, index) => (
                                 <div key={index} className="flex items-center gap-3 animate-in zoom-in-95 duration-200">
-                                    <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md hover:border-sky-100 transition-all">
-                                        <select
-                                            value={p.productoNutricionId}
-                                            onChange={(e) => handleProductChange(index, 'productoNutricionId', parseInt(e.target.value))}
-                                            className="px-4 py-2 bg-slate-50 border border-slate-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 font-bold text-slate-800 text-sm"
-                                        >
-                                            <option value={0}>Producto...</option>
-                                            {productosCatalog.map((prod) => (
-                                                <option key={prod.id} value={prod.id}>{prod.nombre}</option>
-                                            ))}
-                                        </select>
-                                        <div className="relative">
+                                    <div className="flex-1 grid grid-cols-1 sm:grid-cols-12 gap-3 p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md hover:border-sky-100 transition-all items-center">
+                                        <div className="sm:col-span-8">
+                                            <Select
+                                                value={p.productoNutricionId}
+                                                onChange={(e) => handleProductChange(index, 'productoNutricionId', parseInt(e.target.value))}
+                                                icon={<ShoppingBag className="w-4 h-4" />}
+                                            >
+                                                <option value={0}>Producto...</option>
+                                                {productosCatalog.map((prod) => (
+                                                    <option key={prod.id} value={prod.id}>{prod.nombre}</option>
+                                                ))}
+                                            </Select>
+                                        </div>
+                                        <div className="sm:col-span-4 relative">
                                             <input
                                                 type="text"
                                                 inputMode="decimal"
@@ -328,9 +325,9 @@ export function CreateNutricionForm({ cultivoId, onSuccess, onCancel, initialDat
                                                     }
                                                 }}
                                                 placeholder="Dosis"
-                                                className="w-full px-4 py-2 bg-slate-50 border border-slate-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 font-bold text-slate-800 text-sm"
+                                                className="w-full pl-3 pr-12 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 transition-all font-bold text-slate-800 text-sm"
                                             />
-                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400 uppercase">ml/L</span>
+                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400 uppercase pointer-events-none">ml/L</span>
                                         </div>
                                     </div>
                                     <button
@@ -344,6 +341,19 @@ export function CreateNutricionForm({ cultivoId, onSuccess, onCancel, initialDat
                             ))
                         )}
                     </div>
+
+                    {selectedProductos.length > 0 && (
+                        <div className="flex justify-center pt-2">
+                            <button
+                                type="button"
+                                onClick={handleAddProduct}
+                                className="text-[10px] font-black text-sky-600 uppercase flex items-center gap-2 hover:bg-sky-50 px-6 py-3 rounded-2xl border-2 border-dashed border-sky-100 transition-all active:scale-95"
+                            >
+                                <Plus className="w-4 h-4" />
+                                Añadir otro producto
+                            </button>
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -376,15 +386,15 @@ export function CreateNutricionForm({ cultivoId, onSuccess, onCancel, initialDat
                     onClick={onCancel}
                     className="flex-1 px-8 py-4 border border-slate-200 text-slate-400 font-black uppercase tracking-widest text-[10px] rounded-2xl hover:bg-slate-50 transition-all active:scale-[0.98]"
                 >
-                    Cancelar
+                    CANCELAR
                 </button>
                 <button
                     type="submit"
                     disabled={mutation.isPending}
-                    className="flex-[2] px-8 py-4 bg-slate-900 text-white font-black uppercase tracking-widest text-[10px] rounded-2xl hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10 disabled:opacity-50 flex items-center justify-center gap-3 active:scale-[0.98]"
+                    className="flex-[2] px-8 py-4 bg-indigo-600 text-white font-black uppercase tracking-widest text-[10px] rounded-2xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-600/20 disabled:opacity-50 flex items-center justify-center gap-3 active:scale-[0.98]"
                 >
-                    {mutation.isPending ? 'Procesando...' : 'Guardar Registro Nutricional'}
-                    {!mutation.isPending && <Save className="w-5 h-5 text-sky-400" />}
+                    {mutation.isPending ? 'PROCESANDO' : (initialData ? 'ACTUALIZAR' : 'GUARDAR')}
+                    {!mutation.isPending && <Check className="w-5 h-5 text-sky-400" />}
                 </button>
             </div>
         </form>

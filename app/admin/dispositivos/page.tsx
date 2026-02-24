@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { DeviceForm } from '@/components/admin'
 import { Button, LoadingSpinner, ErrorMessage } from '@/components/ui'
+import { Plus } from 'lucide-react'
 import { fetchDispositivos, createDispositivo, updateDispositivo, deleteDispositivo } from '@/lib/api/devices-service'
 import { fetchUsers } from '@/lib/api/users-service'
 import type { Dispositivo, CreateDispositivoDto, UpdateDispositivoDto, User } from '@/lib/types/api'
@@ -106,17 +107,15 @@ export default function DispositivosPage() {
                 <div className="max-w-7xl mx-auto">
                     <div className="mb-8 flex items-center justify-between">
                         <div>
-                            <h2 className="text-3xl font-semibold text-slate-800">Dispositivos del Sistema</h2>
-                            <p className="text-slate-600 mt-1.5">Gestiona todos los dispositivos de control de clima</p>
+                            <h2>Dispositivos del Sistema</h2>
+                            <p className="text-description mt-1.5">Gestiona todos los dispositivos de control de clima activos.</p>
                         </div>
                         <Button
                             onClick={() => { setIsCreateModalOpen(true); setMutationError(null); }}
-                            className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md"
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 font-black uppercase tracking-widest text-[10px] px-6 py-3 rounded-xl"
                         >
-                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                            </svg>
-                            Nuevo Dispositivo
+                            <Plus className="w-5 h-5" />
+                            AÑADIR
                         </Button>
                     </div>
 
