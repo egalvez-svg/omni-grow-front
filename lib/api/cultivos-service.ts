@@ -10,7 +10,9 @@ import type {
     HistorialFase,
     ControlPlaga,
     CreateControlPlagaDto,
-    TimelineEvent
+    TimelineEvent,
+    TareaControlPlaga,
+    ResumenControlPlaga
 } from '@/lib/types/api'
 
 export async function fetchAllCultivos(): Promise<Cultivo[]> {
@@ -112,6 +114,26 @@ export async function registerControlPlaga(data: CreateControlPlagaDto): Promise
 
 export async function updateControlPlaga(id: number, data: Partial<CreateControlPlagaDto>): Promise<ControlPlaga> {
     const response = await apiClient.patch<ControlPlaga>(`/control-plagas/${id}`, data)
+    return response.data
+}
+
+// Tareas de Control de Plagas
+export async function fetchTareasPendientes(cultivoId?: number): Promise<TareaControlPlaga[]> {
+    const response = await apiClient.get<TareaControlPlaga[]>('/control-plagas/tareas/pendientes', {
+        params: { cultivoId }
+    })
+    return response.data
+}
+
+export async function fetchResumenControlPlagas(cultivoId: number): Promise<ResumenControlPlaga> {
+    const response = await apiClient.get<ResumenControlPlaga>('/control-plagas/tareas/resumen', {
+        params: { cultivoId }
+    })
+    return response.data
+}
+
+export async function omitirTareaControlPlaga(id: number, motivo: string): Promise<TareaControlPlaga> {
+    const response = await apiClient.patch<TareaControlPlaga>(`/control-plagas/tareas/${id}/omitir`, { motivo })
     return response.data
 }
 

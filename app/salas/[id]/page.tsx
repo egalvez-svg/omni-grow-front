@@ -10,6 +10,7 @@ import { useAuthContext } from '@/lib/auth/auth-context'
 import { useSala } from '@/hooks/use-sala'
 import { LoadingSpinner } from '@/components/ui'
 import { DashboardHeader } from '@/components/dashboard'
+import { cn } from '@/lib/utils'
 import {
     Plus,
     ArrowLeft,
@@ -28,6 +29,7 @@ import { useState } from 'react'
 import { Modal } from '@/components/ui/modal'
 import { CreateCamaForm } from '@/components/forms/create-cama-form'
 import { CreateSalaForm } from '@/components/forms/create-sala-form'
+import { CreateCultivoForm } from '@/components/forms/create-cultivo-form'
 import { Cama } from '@/lib/types/api'
 
 export default function SalaDetailPage() {
@@ -40,6 +42,7 @@ export default function SalaDetailPage() {
     const [isAddCamaModalOpen, setIsAddCamaModalOpen] = useState(false)
     const [isEditSalaModalOpen, setIsEditSalaModalOpen] = useState(false)
     const [isEditCamaModalOpen, setIsEditCamaModalOpen] = useState(false)
+    const [isAddCultivoModalOpen, setIsAddCultivoModalOpen] = useState(false)
     const [selectedCama, setSelectedCama] = useState<Cama | null>(null)
 
     // 4. Use custom hook for data fetching
@@ -177,7 +180,14 @@ export default function SalaDetailPage() {
                                             return (
                                                 <div
                                                     key={cama.id}
-                                                    onClick={() => router.push(`/camas/${cama.id}`)}
+                                                    onClick={() => {
+                                                        if (cultivoActivo) {
+                                                            router.push(`/cultivos/${cultivoActivo.id}`)
+                                                        } else {
+                                                            setSelectedCama(cama)
+                                                            setIsAddCultivoModalOpen(true)
+                                                        }
+                                                    }}
                                                     className="p-6 border border-slate-100 rounded-3xl hover:border-indigo-100 hover:shadow-xl transition-all group cursor-pointer relative flex flex-col h-full bg-white overflow-hidden"
                                                 >
                                                     {/* Pro Max Decorative Blob */}
@@ -241,8 +251,13 @@ export default function SalaDetailPage() {
                                                         )}
                                                     </div>
 
-                                                    <div className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-slate-50 text-slate-700 font-black uppercase tracking-widest text-[10px] group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 group/btn relative z-10 shadow-sm group-hover:shadow-indigo-600/20">
-                                                        VER DETALLE
+                                                    <div className={cn(
+                                                        "w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all duration-300 group/btn relative z-10 shadow-sm",
+                                                        cultivoActivo
+                                                            ? "bg-slate-50 text-slate-700 group-hover:bg-indigo-600 group-hover:text-white group-hover:shadow-indigo-600/20"
+                                                            : "bg-emerald-50 text-emerald-700 group-hover:bg-emerald-600 group-hover:text-white group-hover:shadow-emerald-600/20"
+                                                    )}>
+                                                        {cultivoActivo ? 'VER CULTIVO' : 'INICIAR CULTIVO'}
                                                         <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                                                     </div>
                                                 </div>
@@ -373,6 +388,33 @@ export default function SalaDetailPage() {
                         }}
                         onCancel={() => {
                             setIsEditCamaModalOpen(false)
+                            setSelectedCama(null)
+                        }}
+                    />
+                )}
+            </Modal>
+
+            {/* Modal para Iniciar Cultivo */}
+            <Modal
+                isOpen={isAddCultivoModalOpen}
+                onClose={() => {
+                    setIsAddCultivoModalOpen(false)
+                    setSelectedCama(null)
+                }}
+                title="Iniciar Nuevo Cultivo"
+                maxWidth="5xl"
+            >
+                {selectedCama && (
+                    <CreateCultivoForm
+                        initialSalaId={id}
+                        initialCamaId={selectedCama.id}
+                        onSuccess={() => {
+                            setIsAddCultivoModalOpen(false)
+                            setSelectedCama(null)
+                            queryClient.invalidateQueries({ queryKey: ['cultivos-sala', id] })
+                        }}
+                        onCancel={() => {
+                            setIsAddCultivoModalOpen(false)
                             setSelectedCama(null)
                         }}
                     />

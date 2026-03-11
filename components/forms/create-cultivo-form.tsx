@@ -16,11 +16,13 @@ import { cn } from '@/lib/utils'
 
 interface CreateCultivoFormProps {
     initialData?: Cultivo
+    initialSalaId?: number
+    initialCamaId?: number
     onSuccess: () => void
     onCancel: () => void
 }
 
-export function CreateCultivoForm({ initialData, onSuccess, onCancel }: CreateCultivoFormProps) {
+export function CreateCultivoForm({ initialData, initialSalaId, initialCamaId, onSuccess, onCancel }: CreateCultivoFormProps) {
     const isEdit = !!initialData
     const queryClient = useQueryClient()
     const { showToast } = useToast()
@@ -42,8 +44,8 @@ export function CreateCultivoForm({ initialData, onSuccess, onCancel }: CreateCu
             fecha_inicio: initialData?.fecha_inicio ? initialData.fecha_inicio.split('T')[0] : new Date().toISOString().split('T')[0],
             faseId: initialData?.faseActual?.id || 0,
             variedadIds,
-            salaId: initialData?.salaId || initialData?.sala?.id || 0,
-            camaId: initialData?.camaId || initialData?.cama?.id || 0,
+            salaId: initialData?.salaId || initialData?.sala?.id || initialSalaId || 0,
+            camaId: initialData?.camaId || initialData?.cama?.id || initialCamaId || 0,
             cantidad_plantas: initialData?.cantidad_plantas || 1,
             medioCultivoId: initialData?.medioCultivoId || 0,
             notas: ''
@@ -210,7 +212,7 @@ export function CreateCultivoForm({ initialData, onSuccess, onCancel }: CreateCu
                         disabled={!formData.salaId}
                     >
                         <option value="">Selecciona cama</option>
-                        {camas?.map(c => (
+                        {camas?.filter(c => !c.ocupada).map(c => (
                             <option key={c.id} value={c.id}>{c.nombre} {c.capacidad_plantas ? `(${c.capacidad_plantas} plantas máx)` : ''}</option>
                         ))}
                     </Select>

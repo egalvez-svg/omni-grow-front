@@ -3,7 +3,9 @@ import {
     fetchCultivoById,
     fetchNutricionHistorial,
     fetchControlPlagasHistorial,
-    fetchCultivoTimeline
+    fetchCultivoTimeline,
+    fetchTareasPendientes,
+    fetchResumenControlPlagas
 } from '@/lib/api/cultivos-service'
 
 export function useCultivo(cultivoId: number) {
@@ -31,12 +33,26 @@ export function useCultivo(cultivoId: number) {
         enabled: !!cultivoId
     })
 
+    const { data: tareasPendientes = [], isLoading: tareasLoading } = useQuery({
+        queryKey: ['tareas-pendientes', cultivoId],
+        queryFn: () => fetchTareasPendientes(cultivoId),
+        enabled: !!cultivoId
+    })
+
+    const { data: resumenPlagas, isLoading: resumenLoading } = useQuery({
+        queryKey: ['resumen-plagas', cultivoId],
+        queryFn: () => fetchResumenControlPlagas(cultivoId),
+        enabled: !!cultivoId
+    })
+
     return {
         cultivo,
         historialNutricion,
         historialControlPlagas,
         timeline,
-        isLoading: cultivoLoading || nutricionLoading || plagasLoading || timelineLoading,
+        tareasPendientes,
+        resumenPlagas,
+        isLoading: cultivoLoading || nutricionLoading || plagasLoading || timelineLoading || tareasLoading || resumenLoading,
         error: cultivoError,
         refetchCultivo
     }

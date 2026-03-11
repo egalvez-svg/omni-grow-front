@@ -268,6 +268,7 @@ export interface Cama {
     columnas?: number
     salaId: number
     sala?: Sala
+    ocupada?: boolean
     creado_en?: string
     actualizado_en?: string
 }
@@ -390,13 +391,22 @@ export interface NutricionDetalle {
     productoNutricion?: Producto
 }
 
+export type MetodoAplicacion = 'foliar' | 'riego' | 'manual' | 'otro';
+export type TipoAplicacion = 'preventivo' | 'combativo';
+
 export interface ControlPlaga {
     id: number
     cultivoId: number
+    nombre: string
     fecha_aplicacion: string
-    metodo_aplicacion: 'foliar' | 'riego' | 'manual' | 'otro'
+    metodo_aplicacion: MetodoAplicacion
+    tipo_aplicacion: TipoAplicacion
+    intervalo_dias: number
+    repeticiones_totales: number
+    repeticion_actual?: number
     notas?: string
     productos?: ControlPlagaDetalle[]
+    tareas?: TareaControlPlaga[]
     creado_en?: string
     actualizado_en?: string
 }
@@ -514,10 +524,55 @@ export interface CreateControlPlagaDetalleDto {
     unidad: 'ml' | 'g'
 }
 
+export type EstadoTarea = 'pendiente' | 'completada' | 'omitida' | 'vencida';
+
+export interface TareaControlPlaga {
+    id: number;
+    cultivoId: number;
+    fecha_programada: string;
+    tipo_aplicacion: TipoAplicacion;
+    estado: EstadoTarea;
+    motivo_omision?: string;
+    repeticion_actual: number;
+    repeticiones_totales: number;
+    cultivo?: {
+        id: number;
+        nombre: string;
+        [key: string]: any;
+    };
+    controlPlaga?: {
+        nombre: string;
+        metodo_aplicacion: MetodoAplicacion;
+        tipo_aplicacion: TipoAplicacion;
+        intervalo_dias: number;
+        repeticiones_totales: number;
+        productos: {
+            productoId: number;
+            cantidad: number;
+            unidad: 'ml' | 'g';
+            producto?: Producto;
+        }[];
+    };
+}
+
+export interface ResumenControlPlaga {
+    total: number;
+    completadas: number;
+    omitidas: number;
+    pendientes: number;
+    vencidas: number;
+    porcentaje_cumplimiento: number;
+}
+
 export interface CreateControlPlagaDto {
+    nombre: string
     cultivoId: number
     fecha_aplicacion: string
-    metodo_aplicacion: 'foliar' | 'riego' | 'manual' | 'otro'
+    metodo_aplicacion: MetodoAplicacion
+    tipo_aplicacion: TipoAplicacion
+    intervalo_dias: number
+    repeticiones_totales: number
+    tareaId?: number
     notas?: string
     productos: CreateControlPlagaDetalleDto[]
 }
@@ -602,6 +657,7 @@ export interface TimelineProduct {
     cantidad: number
     unidad: string
     tipo?: string
+    fabricante?: string
 }
 
 export interface TimelineNutricionData {
@@ -613,7 +669,11 @@ export interface TimelineNutricionData {
 }
 
 export interface TimelineControlPlagaData {
+    nombre: string
     metodo: string
+    tipo_aplicacion: TipoAplicacion
+    estado: EstadoTarea
+    repeticion: string
     productos: TimelineProduct[]
 }
 

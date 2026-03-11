@@ -11,7 +11,9 @@ import {
     Bug,
     ArrowRight,
     Calendar,
-    StickyNote
+    StickyNote,
+    ShieldAlert,
+    Hash
 } from 'lucide-react'
 
 interface UnifiedTimelineProps {
@@ -149,22 +151,63 @@ function NutricionDetails({ data }: { data: TimelineNutricionData }) {
 }
 
 function PlagaDetails({ data }: { data: TimelineControlPlagaData }) {
+    const estadoStyles: Record<string, string> = {
+        completada: 'bg-emerald-50 border-emerald-100 text-emerald-700',
+        omitida: 'bg-slate-100 border-slate-200 text-slate-500',
+        vencida: 'bg-rose-50 border-rose-100 text-rose-600',
+        pendiente: 'bg-amber-50 border-amber-100 text-amber-700',
+    }
+
     return (
         <div className="space-y-3">
-            <div className="flex items-center gap-2 px-3 py-2 bg-rose-50 rounded-xl border border-rose-100 w-fit">
-                <Bug className="w-4 h-4 text-rose-500" />
-                <span className="text-sm font-black text-rose-700 uppercase tracking-wider">{data.metodo}</span>
+            {data.nombre && (
+                <h4 className="text-sm font-black text-slate-800 flex items-center gap-2">
+                    <Bug className="w-4 h-4 text-rose-400 shrink-0" />
+                    {data.nombre}
+                </h4>
+            )}
+            <div className="flex flex-wrap gap-3">
+                <div className="flex items-center gap-2 px-3 py-2 bg-rose-50 rounded-xl border border-rose-100">
+                    <Bug className="w-4 h-4 text-rose-500" />
+                    <span className="text-sm font-black text-rose-700 uppercase tracking-wider">{data.metodo}</span>
+                </div>
+                {data.tipo_aplicacion && (
+                    <div className={cn(
+                        "flex items-center gap-2 px-3 py-2 rounded-xl border",
+                        data.tipo_aplicacion === 'preventivo'
+                            ? "bg-emerald-50 border-emerald-100 text-emerald-700"
+                            : "bg-amber-50 border-amber-100 text-amber-700"
+                    )}>
+                        {data.tipo_aplicacion === 'preventivo' ? <ShieldCheck className="w-3.5 h-3.5" /> : <ShieldAlert className="w-3.5 h-3.5" />}
+                        <span className="text-[10px] font-black uppercase tracking-widest">{data.tipo_aplicacion}</span>
+                    </div>
+                )}
+                {data.estado && (
+                    <div className={cn(
+                        "flex items-center gap-2 px-3 py-2 rounded-xl border",
+                        estadoStyles[data.estado] || estadoStyles.pendiente
+                    )}>
+                        <span className="text-[10px] font-black uppercase tracking-widest">{data.estado}</span>
+                    </div>
+                )}
+                {data.repeticion && (
+                    <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 border border-slate-200 text-slate-600 rounded-xl">
+                        <Hash className="w-3.5 h-3.5" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">{data.repeticion}</span>
+                    </div>
+                )}
             </div>
 
             {data.productos && data.productos.length > 0 && (
-                <div className="grid grid-cols-1 @[500px]:grid-cols-2 gap-2">
+                <div className="flex flex-wrap gap-2">
                     {data.productos.map((p, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <div key={idx} className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-100">
+                            <span className="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0" />
                             <div className="flex flex-col">
-                                <span className="text-sm font-bold text-slate-700">{p.nombre}</span>
-                                {p.tipo && <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">{p.tipo}</span>}
+                                <span className="text-[11px] font-bold text-slate-700">{p.nombre}</span>
+                                {p.fabricante && <span className="text-[8px] font-semibold text-slate-400">{p.fabricante}</span>}
                             </div>
-                            <span className="text-xs font-black text-slate-500 bg-white px-2 py-1 rounded-lg border border-slate-100 shadow-sm">
+                            <span className="text-[10px] font-black text-slate-500 bg-white px-1.5 py-0.5 rounded-md border border-slate-100">
                                 {p.cantidad}{p.unidad}
                             </span>
                         </div>

@@ -4,8 +4,8 @@ import { useState, useMemo } from 'react'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { registerControlPlaga, updateControlPlaga } from '@/lib/api/cultivos-service'
 import { fetchProductos, fetchProductoTipos } from '@/lib/api/catalogos-service'
-import { CreateControlPlagaDto, ControlPlaga, CreateControlPlagaDetalleDto } from '@/lib/types/api'
-import { Plus, ShieldAlert, Bug, Droplets, Calendar, AlignLeft, Activity, Hash, Trash2, Check, Hand, MoreHorizontal, ShoppingBag } from 'lucide-react'
+import { CreateControlPlagaDto, ControlPlaga, CreateControlPlagaDetalleDto, TareaControlPlaga, Producto } from '@/lib/types/api'
+import { Plus, ShieldAlert, Bug, Droplets, Calendar, AlignLeft, Activity, Hash, Trash2, Check, Hand, MoreHorizontal, ShoppingBag, Tag } from 'lucide-react'
 import { ErrorMessage } from '@/components/ui/error-message'
 import { Select } from '@/components/ui'
 import { useToast } from '@/providers/toast-provider'
@@ -16,9 +16,10 @@ interface CreatePestControlFormProps {
     onSuccess: () => void
     onCancel: () => void
     initialData?: ControlPlaga | null
+    tarea?: TareaControlPlaga
 }
 
-export function CreatePestControlForm({ cultivoId, onSuccess, onCancel, initialData }: CreatePestControlFormProps) {
+export function CreatePestControlForm({ cultivoId, onSuccess, onCancel, initialData, tarea }: CreatePestControlFormProps) {
     const queryClient = useQueryClient()
     const { showToast } = useToast()
 
@@ -45,7 +46,19 @@ export function CreatePestControlForm({ cultivoId, onSuccess, onCancel, initialD
         initialData?.fecha_aplicacion ? initialData.fecha_aplicacion.split('T')[0] : new Date().toISOString().split('T')[0]
     )
     const [metodoAplicacion, setMetodoAplicacion] = useState<'foliar' | 'riego' | 'manual' | 'otro'>(
-        initialData?.metodo_aplicacion || 'foliar'
+        initialData?.metodo_aplicacion || (tarea?.controlPlaga?.metodo_aplicacion as any) || 'foliar'
+    )
+    const [tipoAplicacion, setTipoAplicacion] = useState<'preventivo' | 'combativo'>(
+        initialData?.tipo_aplicacion || tarea?.tipo_aplicacion || 'preventivo'
+    )
+    const [intervaloDias, setIntervaloDias] = useState<string>(
+        initialData?.intervalo_dias?.toString() || tarea?.controlPlaga?.intervalo_dias?.toString() || '15'
+    )
+    const [repeticiones, setRepeticiones] = useState<string>(
+        initialData?.repeticiones_totales?.toString() || tarea?.controlPlaga?.repeticiones_totales?.toString() || '3'
+    )
+    const [nombre, setNombre] = useState(
+        initialData?.nombre || tarea?.controlPlaga?.nombre || ''
     )
     const [notas, setNotas] = useState(initialData?.notas || '')
     const [selectedProductos, setSelectedProductos] = useState<(Omit<CreateControlPlagaDetalleDto, 'cantidad'> & { cantidad: string | number })[]>(
@@ -53,8 +66,18 @@ export function CreatePestControlForm({ cultivoId, onSuccess, onCancel, initialD
             productoId: p.productoId,
             cantidad: p.cantidad.toString(),
             unidad: p.unidad as 'ml' | 'g'
+        })) || tarea?.controlPlaga?.productos?.map((p: any) => ({
+            productoId: p.productoId,
+            cantidad: p.cantidad.toString(),
+            unidad: p.unidad
         })) || []
     )
+
+    const handleTipoChange = (newTipo: 'preventivo' | 'combativo') => {
+        setTipoAplicacion(newTipo)
+        // Suggest interval based on type
+        setIntervaloDias(newTipo === 'preventivo' ? '15' : '3')
+    }
 
     const mutation = useMutation({
         mutationFn: (data: CreateControlPlagaDto) => {
@@ -63,9 +86,14 @@ export function CreatePestControlForm({ cultivoId, onSuccess, onCancel, initialD
             }
             return registerControlPlaga(data)
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['control-plagas', cultivoId] })
-            queryClient.invalidateQueries({ queryKey: ['timeline', cultivoId] })
+        onSuccess: async () => {
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: ['control-plagas', cultivoId] }),
+                queryClient.invalidateQueries({ queryKey: ['timeline', cultivoId] }),
+                queryClient.invalidateQueries({ queryKey: ['tareas-pendientes', cultivoId] }),
+                queryClient.invalidateQueries({ queryKey: ['resumen-plagas', cultivoId] }),
+                queryClient.invalidateQueries({ queryKey: ['cultivo', cultivoId] })
+            ])
             showToast(initialData ? '¡Registro actualizado!' : '¡Aplicación de control de plagas registrada!', 'success')
             onSuccess()
         },
@@ -110,9 +138,14 @@ export function CreatePestControlForm({ cultivoId, onSuccess, onCancel, initialD
         }
 
         const payload: CreateControlPlagaDto = {
+            nombre: nombre || `Tratamiento ${tipoAplicacion}`,
             cultivoId,
             fecha_aplicacion: fechaAplicacion,
             metodo_aplicacion: metodoAplicacion,
+            tipo_aplicacion: tipoAplicacion,
+            intervalo_dias: parseInt(intervaloDias) || 1,
+            repeticiones_totales: parseInt(repeticiones) || 1,
+            tareaId: tarea?.id,
             notas: notas,
             productos: validProductos
         }
@@ -124,63 +157,144 @@ export function CreatePestControlForm({ cultivoId, onSuccess, onCancel, initialD
         <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Columna Izquierda: Método y Fecha */}
-                <div className="space-y-4">
-                    <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <Activity className="w-4 h-4" />
-                        Configuración
-                    </h3>
+                {!tarea && (
+                    <div className="space-y-4">
+                        <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                            <Activity className="w-4 h-4" />
+                            Configuración
+                        </h3>
 
-                    <div className="space-y-4 bg-slate-50 p-6 rounded-[2.5rem] border border-slate-100">
-                        {/* Método de Aplicación */}
-                        <div className="space-y-2">
-                            <label className="text-xs font-bold text-slate-500 uppercase ml-1">Método de Aplicación</label>
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                {[
-                                    { id: 'foliar', label: 'Foliar', icon: Bug },
-                                    { id: 'riego', label: 'Riego', icon: Droplets },
-                                    { id: 'otro', label: 'Otro', icon: MoreHorizontal },
-                                ].map((type) => {
-                                    const Icon = type.icon
-                                    const isSelected = metodoAplicacion === type.id
-                                    return (
-                                        <button
-                                            key={type.id}
-                                            type="button"
-                                            onClick={() => setMetodoAplicacion(type.id as any)}
-                                            className={cn(
-                                                "flex items-center gap-2 px-4 py-3 rounded-2xl border-2 transition-all font-bold text-xs text-left",
-                                                isSelected
-                                                    ? "bg-rose-600 border-rose-600 text-white shadow-lg shadow-rose-600/20"
-                                                    : "bg-white border-slate-100 text-slate-500 hover:border-rose-200"
-                                            )}
-                                        >
-                                            <Icon className={cn("w-4 h-4", isSelected ? "text-rose-200" : "text-slate-400")} />
-                                            {type.label}
-                                        </button>
-                                    )
-                                })}
+                        <div className="space-y-4 bg-slate-50 p-6 rounded-[2.5rem] border border-slate-100">
+                            {/* Nombre del Tratamiento */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-slate-500 uppercase ml-1">Nombre del Tratamiento</label>
+                                <div className="relative">
+                                    <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                    <input
+                                        required
+                                        type="text"
+                                        value={nombre}
+                                        onChange={(e) => setNombre(e.target.value)}
+                                        placeholder="Ej: Tratamiento contra Oidio"
+                                        className="w-full pl-10 pr-4 py-3 bg-white border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all font-bold text-slate-800 text-xs"
+                                    />
+                                </div>
                             </div>
-                        </div>
+                            {/* Tipo de Aplicación */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-slate-500 uppercase ml-1">Tipo de Aplicación</label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {[
+                                        { id: 'preventivo', label: 'Preventivo', icon: Check },
+                                        { id: 'combativo', label: 'Combativo', icon: ShieldAlert },
+                                    ].map((type) => {
+                                        const Icon = type.icon
+                                        const isSelected = tipoAplicacion === type.id
+                                        return (
+                                            <button
+                                                key={type.id}
+                                                type="button"
+                                                onClick={() => handleTipoChange(type.id as any)}
+                                                className={cn(
+                                                    "flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border-2 transition-all font-bold text-xs",
+                                                    isSelected
+                                                        ? "bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-600/20"
+                                                        : "bg-white border-slate-100 text-slate-500 hover:border-indigo-200"
+                                                )}
+                                            >
+                                                <Icon className={cn("w-4 h-4", isSelected ? "text-indigo-200" : "text-slate-400")} />
+                                                {type.label}
+                                            </button>
+                                        )
+                                    })}
+                                </div>
+                            </div>
 
-                        {/* Fecha */}
-                        <div className="space-y-2">
-                            <label className="text-xs font-bold text-slate-500 uppercase ml-1">Fecha de Aplicación</label>
-                            <div className="relative">
-                                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                                <input
-                                    required
-                                    type="date"
-                                    value={fechaAplicacion}
-                                    onChange={(e) => setFechaAplicacion(e.target.value)}
-                                    className="w-full pl-12 pr-4 py-3 bg-white border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all font-bold text-slate-800"
-                                />
+                            <div className="grid grid-cols-2 gap-4">
+                                {/* Fecha */}
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-500 uppercase ml-1">Fecha</label>
+                                    <div className="relative">
+                                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                        <input
+                                            required
+                                            type="date"
+                                            value={fechaAplicacion}
+                                            onChange={(e) => setFechaAplicacion(e.target.value)}
+                                            className="w-full pl-10 pr-4 py-3 bg-white border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all font-bold text-slate-800 text-xs"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Intervalo */}
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-500 uppercase ml-1">Frecuencia (días)</label>
+                                    <div className="relative">
+                                        <Activity className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                        <input
+                                            required
+                                            type="number"
+                                            min="1"
+                                            value={intervaloDias}
+                                            onChange={(e) => setIntervaloDias(e.target.value)}
+                                            className="w-full pl-10 pr-4 py-3 bg-white border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all font-bold text-slate-800 text-xs"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Repeticiones */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-slate-500 uppercase ml-1">Número de Repeticiones</label>
+                                <div className="relative">
+                                    <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                    <input
+                                        required
+                                        type="number"
+                                        min="1"
+                                        value={repeticiones}
+                                        onChange={(e) => setRepeticiones(e.target.value)}
+                                        className="w-full pl-10 pr-4 py-3 bg-white border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all font-bold text-slate-800 text-xs"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Método de Aplicación */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-slate-500 uppercase ml-1">Método de Aplicación</label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {[
+                                        { id: 'foliar', label: 'Foliar', icon: Bug },
+                                        { id: 'riego', label: 'Riego', icon: Droplets },
+                                        { id: 'otro', label: 'Otro', icon: MoreHorizontal },
+                                    ].map((type) => {
+                                        const Icon = type.icon
+                                        const isSelected = metodoAplicacion === type.id
+                                        return (
+                                            <button
+                                                key={type.id}
+                                                type="button"
+                                                onClick={() => setMetodoAplicacion(type.id as any)}
+                                                className={cn(
+                                                    "flex flex-col items-center justify-center gap-1.5 px-2 py-3 rounded-2xl border-2 transition-all font-bold text-[10px]",
+                                                    isSelected
+                                                        ? "bg-rose-600 border-rose-600 text-white shadow-lg shadow-rose-600/20"
+                                                        : "bg-white border-slate-100 text-slate-500 hover:border-rose-200"
+                                                )}
+                                            >
+                                                <Icon className={cn("w-4 h-4", isSelected ? "text-rose-200" : "text-slate-400")} />
+                                                {type.label}
+                                            </button>
+                                        )
+                                    })}
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                )}
 
-                {/* Columna Derecha: Resumen Temporal o Notas */}
-                <div className="space-y-4">
+                {/* Columna Derecha: Notas */}
+                <div className={cn("space-y-4", tarea ? "md:col-span-2" : "md:col-span-1")}>
                     <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                         <AlignLeft className="w-4 h-4" />
                         Notas y Observaciones

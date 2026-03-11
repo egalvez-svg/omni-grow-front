@@ -41,7 +41,8 @@ import { CreatePestControlForm } from '@/components/forms/create-pest-control-fo
 import { CreateCultivoForm } from '@/components/forms/create-cultivo-form'
 import { ChangePhaseForm } from '@/components/forms/change-phase-form'
 import { AIAnalysisView } from '@/components/cultivos/ai-analysis-view'
-import { Planta, NutricionSemanal, ControlPlaga } from '@/lib/types/api'
+import { PestControlAlert } from '@/components/cultivos/pest-control-alert'
+import { Planta, NutricionSemanal, ControlPlaga, TareaControlPlaga } from '@/lib/types/api'
 import type { TimeRange } from '@/lib/utils/mock-sensor-data'
 
 // Tab Components
@@ -88,6 +89,7 @@ export default function CultivoDetailPage() {
     const [selectedPlanta, setSelectedPlanta] = useState<Planta | null>(null)
     const [selectedNutricion, setSelectedNutricion] = useState<NutricionSemanal | null>(null)
     const [selectedPlaga, setSelectedPlaga] = useState<ControlPlaga | null>(null)
+    const [pendingTarea, setPendingTarea] = useState<TareaControlPlaga | undefined>(undefined)
 
     // Data fetching
     const {
@@ -95,6 +97,8 @@ export default function CultivoDetailPage() {
         historialNutricion,
         historialControlPlagas,
         timeline,
+        tareasPendientes,
+        resumenPlagas,
         isLoading: dataLoading
     } = useCultivo(id)
 
@@ -132,8 +136,14 @@ export default function CultivoDetailPage() {
 
     const deletePlagaMutation = useMutation({
         mutationFn: (logId: number) => deleteControlPlaga(logId),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['control-plagas', id] })
+        onSuccess: async () => {
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: ['control-plagas', id] }),
+                queryClient.invalidateQueries({ queryKey: ['timeline', id] }),
+                queryClient.invalidateQueries({ queryKey: ['tareas-pendientes', id] }),
+                queryClient.invalidateQueries({ queryKey: ['resumen-plagas', id] }),
+                queryClient.invalidateQueries({ queryKey: ['cultivo', id] })
+            ])
             showToast('Registro de control de plagas eliminado', 'success')
         },
         onError: () => showToast('Error al eliminar el registro', 'error')
@@ -348,6 +358,15 @@ export default function CultivoDetailPage() {
             {/* Independent Scroll Content Area */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar pb-24">
                 <div className="max-w-7xl mx-auto px-[var(--space-sm)] @[600px]:px-6 py-6 transition-all duration-300">
+                    <PestControlAlert
+                        tareas={tareasPendientes}
+                        cultivoId={id}
+                        onAddApplication={(tarea) => {
+                            setPendingTarea(tarea)
+                            setIsAddPlagaModalOpen(true)
+                        }}
+                    />
+
                     {activeTab === 'info' && (
                         <OverviewTab
                             cultivo={cultivo}
@@ -380,6 +399,7 @@ export default function CultivoDetailPage() {
                     {activeTab === 'plagas' && (
                         <ControlPlagasTab
                             historialPlagas={historialControlPlagas || []}
+                            resumenPlagas={resumenPlagas}
                             onAddPlaga={() => setIsAddPlagaModalOpen(true)}
                             onEditPlaga={handleEditPlaga}
                             onDeletePlaga={handleDeletePlaga}
@@ -535,12 +555,22 @@ export default function CultivoDetailPage() {
                 </div>
                 <CreatePestControlForm
                     cultivoId={id}
-                    onSuccess={() => {
+                    tarea={pendingTarea}
+                    onSuccess={async () => {
                         setIsAddPlagaModalOpen(false)
-                        queryClient.invalidateQueries({ queryKey: ['control-plagas', id] })
-                        queryClient.invalidateQueries({ queryKey: ['timeline', id] })
+                        setPendingTarea(undefined)
+                        await Promise.all([
+                            queryClient.invalidateQueries({ queryKey: ['control-plagas', id] }),
+                            queryClient.invalidateQueries({ queryKey: ['timeline', id] }),
+                            queryClient.invalidateQueries({ queryKey: ['tareas-pendientes', id] }),
+                            queryClient.invalidateQueries({ queryKey: ['resumen-plagas', id] }),
+                            queryClient.invalidateQueries({ queryKey: ['cultivo', id] })
+                        ])
                     }}
-                    onCancel={() => setIsAddPlagaModalOpen(false)}
+                    onCancel={() => {
+                        setIsAddPlagaModalOpen(false)
+                        setPendingTarea(undefined)
+                    }}
                 />
             </Modal>
 
@@ -567,11 +597,16 @@ export default function CultivoDetailPage() {
                 <CreatePestControlForm
                     cultivoId={id}
                     initialData={selectedPlaga}
-                    onSuccess={() => {
+                    onSuccess={async () => {
                         setIsEditPlagaModalOpen(false)
                         setSelectedPlaga(null)
-                        queryClient.invalidateQueries({ queryKey: ['control-plagas', id] })
-                        queryClient.invalidateQueries({ queryKey: ['timeline', id] })
+                        await Promise.all([
+                            queryClient.invalidateQueries({ queryKey: ['control-plagas', id] }),
+                            queryClient.invalidateQueries({ queryKey: ['timeline', id] }),
+                            queryClient.invalidateQueries({ queryKey: ['tareas-pendientes', id] }),
+                            queryClient.invalidateQueries({ queryKey: ['resumen-plagas', id] }),
+                            queryClient.invalidateQueries({ queryKey: ['cultivo', id] })
+                        ])
                     }}
                     onCancel={() => {
                         setIsEditPlagaModalOpen(false)
